@@ -7,7 +7,7 @@ export const send = async (
   to: string,
   keyPair: KeyPair,
   value: number,
-  bounce = true
+  bounce = false
 ) => {
   const { contracts } = client;
   const runMessage = await contracts.createRunMessage({
