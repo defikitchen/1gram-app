@@ -1,0 +1,179 @@
+<template>
+  <v-app-bar
+    v-if="meta.showToolbar"
+    app
+    :data-color="themeColor"
+    :color="$route.meta.toolbarType || 'primary'"
+    light
+    class="main-app-bar"
+  >
+    <div class="aligner">
+      <div class="actions-left">
+        <v-btn
+          v-if="!meta.hideBack"
+          icon
+          small
+          name="back-button"
+          :loading="loading"
+          @click="back"
+        >
+          <v-icon>{{ meta.backIcon || "keyboard_arrow_left" }}</v-icon>
+        </v-btn>
+
+        <portal-target class="d-inline" name="nav-actions" />
+      </div>
+
+      <div class="bar-title">
+        <v-toolbar-title class="title justify-center">
+          <span v-if="!hasTitlePassengers">{{ meta.title || "" }}</span>
+          <portal-target
+            ref="titlePortal"
+            name="page-title"
+            class="inline-block"
+          />
+        </v-toolbar-title>
+      </div>
+      <div class="actions-right">
+        <v-btn small icon @click="toggleHelp" :input-value="helpOpen">
+          <v-icon>help</v-icon>
+        </v-btn>
+        <v-btn
+          class="unclickable"
+          :hidden="meta.hideFab"
+          name="nav-drawer"
+          icon
+          small
+          v-if="notificationCount > 0"
+        >
+          <v-badge color="red" overlap :value="notificationCount">
+            <template v-slot:badge>
+              <span v-if="notificationCount > 0">{{ notificationCount }}</span>
+            </template>
+            <v-icon v-if="notificationCount > 0">notifications_active</v-icon>
+          </v-badge>
+        </v-btn>
+      </div>
+    </div>
+  </v-app-bar>
+</template>
+
+<script lang="ts">
+import {
+  defineComponent,
+  computed,
+  ComputedRef,
+  ref
+} from "@vue/composition-api";
+import { RouteWithProps, MetaProps } from "@/common/routes";
+import { useVuex } from "@/common/hooks/use-vuex";
+import { useRouter, useMeta } from "@/common/hooks/use-router";
+
+export default defineComponent({
+  setup(_, ctx) {
+    const titlePortal = ref(null);
+    const {
+      store: { state, commit, getters, dispatch }
+    } = useVuex();
+    const router = useRouter();
+    const meta = useMeta(ctx);
+    const route = computed(() => ctx.root.$route);
+    const themeColor = computed(() => getters.Wallet.wallet?.color);
+    const openDrawer = () => commit.Common.setDrawer({ value: true });
+    const toggleHelp = dispatch.Common.Help.toggle;
+    const helpOpen = computed(() => state.Common.Help.open);
+    const notificationCount = computed(
+      () => getters.Common.Notifications.notificationCount
+    );
+    const loading = computed(() => state.Common.Loading.loading);
+
+    const hasTitlePassengers = computed(
+      () => (titlePortal?.value as any)?.transports["page-title"]?.length > 0
+    );
+
+    const back = () =>
+      meta?.value?.backRoute
+        ? router.push(meta?.value?.backRoute || "")
+        : router.go(-1);
+
+    return {
+      meta,
+      openDrawer,
+      notificationCount,
+      toggleHelp,
+      back,
+      helpOpen,
+      route,
+      loading,
+      titlePortal,
+      hasTitlePassengers,
+      themeColor
+    };
+  }
+});
+</script>
+
+<style lang="scss" scoped>
+.main-app-bar {
+  // there's a bug in the default z-index options
+  z-index: 18 !important;
+
+  .nav-bar.no--shadow & {
+    box-shadow: none !important;
+  }
+}
+.main-nav-drawer {
+  // there's a bug in the default z-index options
+  z-index: 21 !important;
+}
+.title {
+  display: flex;
+
+  svg {
+    transform: scale(0.85);
+  }
+}
+
+.aligner {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+
+  $actions-width: 120px;
+
+  .actions-left,
+  .actions-right {
+    width: $actions-width;
+  }
+
+  .actions-left > .v-btn:not(:last-child) {
+    margin-right: 6px;
+  }
+
+  .actions-right > .v-btn:not(:first-child) {
+    margin-left: 6px;
+  }
+
+  .actions-right {
+    text-align: right;
+  }
+
+  .bar-title {
+    width: calc(100% - #{$actions-width * 2});
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-portal {
+    display: inline;
+  }
+}
+</style>
+
+<style>
+.main-app-bar .v-toolbar__content {
+  padding: 4px 9px !important;
+}
+</style>

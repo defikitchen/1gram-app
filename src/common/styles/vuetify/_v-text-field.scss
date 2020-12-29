@@ -1,0 +1,108 @@
+@import "~vuetify/src/styles/settings/colors";
+
+* .v-text-field input {
+  line-height: 0.9;
+  max-height: none;
+}
+
+.amount-number {
+  .theme--light.v-label {
+    color: rgba(black, 0.54) !important;
+  }
+  .theme--dark.v-label {
+    color: rgba(white, 0.54) !important;
+  }
+
+  .v-application.theme--light & {
+    .v-text-field__prefix {
+      color: rgba(black, 0.54) !important;
+    }
+  }
+  .v-application.theme--dark & {
+    .v-text-field__prefix {
+      color: rgba(white, 0.54) !important;
+    }
+  }
+}
+
+.v-text-field.type--large {
+  font-size: 3.25rem;
+  font-weight: 700;
+
+  .v-input__slot {
+    background: rgba(white, 0) !important;
+    text-align: center !important;
+  }
+  .v-label {
+    text-align: center !important;
+    left: calc(50%) !important;
+    transform: translateX(-50%);
+    font-weight: 400;
+  }
+
+  &.type--left {
+    .v-input__slot {
+      text-align: center !important;
+    }
+    .v-label {
+      text-align: left !important;
+      left: 0 !important;
+      transform: translateX(0);
+    }
+
+    input {
+      text-align: left;
+    }
+  }
+
+  input {
+    text-align: center;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    -moz-appearance: textfield;
+  }
+
+  &.error--text {
+    input {
+      color: inherit;
+    }
+  }
+
+  .v-input__control input {
+    max-height: none !important;
+  }
+
+  .v-messages {
+    color: rgba(white, 0.9) !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.5rem;
+  }
+
+  .v-input__icon--append {
+    position: relative;
+    top: -0.125rem;
+  }
+
+  .v-text-field__details {
+    padding: 0 !important;
+  }
+
+  .v-label {
+    overflow: initial;
+    font-size: 3.25rem;
+    font-weight: 500;
+  }
+}
+
+.v-text-field.has--copy input {
+  font-size: 15px;
+  opacity: 0.7;
+}
+
+.v-input.has--copy .v-input__icon {
+  transform: scale(0.75);
+  opacity: 0.7;
+}

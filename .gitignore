@@ -1,0 +1,50 @@
+.env
+.DS_Store
+node_modules
+/dist
+/public/tapplets/*
+# TONKIT DATA
+/data/**/*.*
+/temp
+
+# key store
+*.jks
+
+# GENERATED FILES
+/.npmrc
+
+# local env files
+.env
+!.env.sample
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Outputs
+/dist_electron
+/dist
+
+tmp/
+.npm/
+*.log
+.jest-*
+
+# WASM
+/public/assets/wasm
+
+# Cordova
+/src-cordova/platforms
+/src-cordova/plugins
+/public/cordova.js
+

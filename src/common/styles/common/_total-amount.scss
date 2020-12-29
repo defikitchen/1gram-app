@@ -1,0 +1,20 @@
+.total-amount {
+  &__amount {
+    font-size: 3.25rem !important;
+    line-height: 3.2rem !important;
+    font-weight: 700;
+    margin-bottom: 0.75rem !important;
+
+    small {
+      font-size: 60%;
+      vertical-align: bottom !important;
+    }
+  }
+
+  &__usd {
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    font-weight: 700;
+    margin-bottom: 0.75rem !important;
+  }
+}

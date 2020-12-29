@@ -1,0 +1,39 @@
+name: "[Surge] Build and Deploy "
+on:
+  push:
+    branches:
+      - dev/*
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Install Dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Archive Production Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: dist
+  deploy:
+    name: Deploy -> https://1gram.surge.sh
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install surge and fire deployment
+        uses: actions/setup-node@v1
+        with:
+          node-version: 8
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
+      - run: npm install -g surge
+      - run: surge ./dist  https://1gram.surge.sh --token ${{ secrets.SURGE_TOKEN }}
