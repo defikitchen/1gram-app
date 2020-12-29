@@ -19,8 +19,7 @@
     "deploy:staging": "firebase hosting:staging:deploy --expires 30d",
     "deploy:staging:ci": "firebase hosting:staging:deploy --expires 30d --token $FIREBASE_TOKEN",
     "start": "npm run browser:start",
-    "build": "npm run browser:build",
-    "sync-config-xml": "yarn config-xml-version -s src-cordova/config.xml -d src-cordova/config.xml"
+    "build": "npm run browser:build"
   },
   "main": "background.js",
   "dependencies": {
@@ -126,8 +125,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "yarn sync-config-xml"
+      "pre-commit": "lint-staged"
     }
   },
   "license": "MIT",
