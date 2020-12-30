@@ -97,7 +97,11 @@
         </div>
       </v-expand-transition>
 
-      <div @click="deploy" class="mb-6 clickable" v-if="wallet.needsDeployment">
+      <div
+        @click="deploy"
+        class="mb-6 clickable"
+        v-if="wallet.needsDeployment && wallet.keyPair"
+      >
         <deploy-warning :deploying="forging" />
       </div>
 
