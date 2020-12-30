@@ -1,18 +1,20 @@
 <template>
   <Page v-if="wallet">
-    <PageContent>
+    <PageContent :width="532">
       <div class="text-center pb-2">
-        <v-avatar :size="90" @click="$router.push('/wallet')">
+        <v-avatar :size="90" @click="$router.push('/wallet')" class="clickable">
           <identicon :size="90" :seed="wallet.address" />
         </v-avatar>
-        <v-list-item-title class="mt-3">{{ wallet.name }}</v-list-item-title>
+        <v-list-item-title class="mt-3 clickable" @click="changeName">{{
+          wallet.name
+        }}</v-list-item-title>
         <v-btn text small color="primary" @click="changeName"
           >Change Name</v-btn
         >
       </div>
 
       <v-list class="list--clean">
-        <v-list-item v-if="wallet.address">
+        <v-list-item class="px-4 pb-1" v-if="wallet.address">
           <v-list-item-content>
             <v-list-item-subtitle class="d-flex align-center">
               Address
@@ -40,22 +42,34 @@
             />
           </v-list-item-content>
         </v-list-item>
-        <v-divider class="my-1" />
+        <v-divider class="mx-4" />
 
-        <v-list-item>
+        <v-list-item to="?modal=walletNetwork" class="px-4 py-1">
           <v-list-item-content>
             <v-list-item-subtitle>Network</v-list-item-subtitle>
-            <v-list-item-title class="mt-1">{{
-              wallet.network.name
-            }}</v-list-item-title>
+            <v-list-item-title class="mt-1">
+              {{ wallet.network.symbol }}
+              {{ wallet.network.name }}</v-list-item-title
+            >
           </v-list-item-content>
+          <v-list-item-action>
+            <v-btn
+              small
+              text
+              class="mr-n3 half-transparent"
+              to="?modal=walletNetwork"
+            >
+              Change
+              <v-icon x-small class="ml-1" v-text="'edit'" />
+            </v-btn>
+          </v-list-item-action>
         </v-list-item>
 
-        <v-divider class="my-1" />
-        <v-list-item>
+        <v-divider class="mx-4" />
+        <v-list-item class="px-4 py-1" @click="menu = true">
           <v-list-item-content>
             <v-list-item-subtitle class="d-flex align-center">
-              <span @click="menu = true" class="clickable pr-3">Color</span>
+              <span class="clickable pr-3">Color</span>
 
               <v-menu
                 v-model="menu"
@@ -85,8 +99,8 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
-        <v-divider class="my-1" />
-        <v-subheader class="px-0 mb-n1 mt-2">
+        <v-divider class="mx-4" v-if="wallet.keyPair" />
+        <v-subheader class="mb-n1 mt-2" v-if="wallet.keyPair">
           Backup
           <v-spacer />
           <v-btn
@@ -101,7 +115,7 @@
           </v-btn>
         </v-subheader>
         <div
-          class="clickable mt-2 mb-3"
+          class="clickable mt-2 mb-3 px-4"
           v-show="!wallet.backedUp && !wallet.imported"
           @click="backup"
         >
@@ -109,7 +123,7 @@
         </div>
 
         <template v-if="expert && wallet.path">
-          <v-list-item>
+          <v-list-item class="px-4">
             <v-list-item-content>
               <v-list-item-subtitle class="mb-1"
                 >Derivation Path</v-list-item-subtitle
@@ -121,7 +135,7 @@
           </v-list-item>
         </template>
 
-        <v-list-item v-if="wallet.mnemonic">
+        <v-list-item v-if="wallet.mnemonic" class="px-4">
           <v-list-item-content>
             <v-list-item-title class="d-flex align-center">
               Secret phrase
@@ -152,7 +166,7 @@
             </v-expand-transition>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item class="px-4" v-if="wallet.keyPair">
           <v-list-item-content>
             <v-list-item-title class="d-flex align-center">
               Private key
@@ -195,7 +209,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item>
+        <v-list-item class="px-4" v-if="wallet.keyPair">
           <v-list-item-content>
             <v-list-item-title class="d-flex align-center">
               Public key
@@ -250,11 +264,9 @@
 
 <script lang="ts">
 import "reflect-metadata";
-import { Component, Vue, Watch } from "vue-property-decorator";
-import store, { notify } from "@/common/store";
+import { notify } from "@/common/store";
 import { getColor } from "../../../lib/identicon";
 import { decrypt } from "@/common/lib/crypto";
-import { Wallet } from "@/common/models/wallet";
 import { useExplorer } from "@/common/hooks/use-explorer";
 import {
   computed,
@@ -267,8 +279,10 @@ import { useVuex } from "@/common/hooks/use-vuex";
 import { useRouter } from "@/common/hooks/use-router";
 import { KeyPair } from "@/common/sdk";
 import { useCopy } from "@/common/hooks/use-copy";
+import NetworkList from "../components/NetworkList.vue";
 
 export default defineComponent({
+  components: { NetworkList },
   setup(_, { root }) {
     const { store } = useVuex();
     const wallet = computed(() => store.getters.Wallet.wallet);

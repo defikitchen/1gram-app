@@ -32,6 +32,23 @@
 
     <v-bottom-sheet
       max-width="600"
+      v-model="modals.walletNetwork.value"
+      inset
+      v-if="wallet"
+      overlay-opacity=".8"
+      :overlay-color="$vuetify.theme.dark ? 'black' : 'white'"
+    >
+      <network-list
+        :active="wallet.network"
+        :dumb="true"
+        @select="selectNetwork"
+        color="accent"
+        title="Wallet Network"
+      />
+    </v-bottom-sheet>
+
+    <v-bottom-sheet
+      max-width="600"
       v-model="modals.walletMenu.value"
       inset
       overlay-opacity=".8"
@@ -92,9 +109,10 @@ export default defineComponent({
     const router = useRouter();
     const closeModals = () => router.push("?");
     const {
-      store: { state, commit }
+      store: { state, commit, getters, dispatch }
     } = useVuex();
     const route = useRoute(ctx);
+    const wallet = computed(() => getters.Wallet.wallet);
 
     const pinDialog = computed({
       get: () => state.Common.Login.pinDialog,
@@ -115,7 +133,8 @@ export default defineComponent({
       "networkList",
       "walletMenu",
       "currency",
-      "contacts"
+      "contacts",
+      "walletNetwork"
     ];
 
     const modals: ComputedRef<{ [key: string]: { value: boolean } }> = computed(
@@ -134,13 +153,28 @@ export default defineComponent({
         )
     );
 
+    const selectNetwork = async (network: Network) => {
+      const address = wallet.value?.address;
+      if (!address) return router.push("/portfolio");
+      router.push("?");
+      commit.Wallet.patchWallet({
+        address: wallet.value?.address || "",
+        update: {
+          network
+        }
+      });
+      await dispatch.Wallet.updateWallet({ address, force: true });
+    };
+
     return {
       pinDialog,
       closeModals,
       route,
       modals,
       openModal,
-      addNetwork
+      addNetwork,
+      wallet,
+      selectNetwork
     };
   }
 });

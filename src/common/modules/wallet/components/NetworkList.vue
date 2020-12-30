@@ -5,16 +5,11 @@
     </v-list-item>
     <v-divider />
     <v-list-item
-      :input-value="
-        network && net.name === network.name && net.protocol === net.protocol
-      "
+      :input-value="isActive(net)"
       active-class="active"
       v-for="(net, i) of networks"
       :key="i"
-      @click="
-        selectNetwork(net);
-        $emit('select', net);
-      "
+      @click="selectNetwork(net)"
     >
       <v-list-item-icon>
         <v-icon>network_check</v-icon>
@@ -44,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "@vue/composition-api";
+import { defineComponent, computed, PropType } from "@vue/composition-api";
 import { useVuex } from "@/common/hooks/use-vuex";
 import { Network } from "@/common/models/network";
 
@@ -54,9 +49,13 @@ export default defineComponent({
       type: String,
       default: "Networks"
     },
-    color: String
+    color: String,
+    dumb: {
+      default: false
+    },
+    active: [Object, undefined] as PropType<Network | undefined>
   },
-  setup() {
+  setup(props, { emit }) {
     const { store } = useVuex();
     const networks = computed(() => store.state.Wallet.networks);
     const network = computed(() => store.state.Wallet.network);
@@ -67,14 +66,27 @@ export default defineComponent({
     };
 
     const selectNetwork = (network: Network) => {
+      emit("select", network);
+      if (props.dumb) return;
       store.commit.Wallet.setNetwork(network);
+    };
+
+    const isActive = (net: Network) => {
+      if (!props.dumb)
+        return (
+          network.value &&
+          net.name === network.value?.name &&
+          net.protocol === net.protocol
+        );
+      else return props.active?.name === net.name;
     };
 
     return {
       networks,
       network,
       selectNetwork,
-      isEmoji
+      isEmoji,
+      isActive
     };
   }
 });

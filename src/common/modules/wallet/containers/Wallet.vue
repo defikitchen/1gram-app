@@ -1,6 +1,6 @@
 <template>
   <Page v-if="wallet && wallet.address">
-    <span class="clickable" @click="copy(wallet.address)">
+    <span class="clickable">
       <portal to="page-title"
         ><span class="clickable-bg" @click="$router.push('?modal=walletMenu')"
           >{{ wallet.name }}
@@ -10,8 +10,17 @@
 
       <PageSubtitle>
         <span class="clickable-bg">
-          {{ wallet.address | shortify }}
-          <v-chip color="black" class="ml-2" light outlined x-small>
+          <span @click="copy(wallet.address)">{{
+            wallet.address | shortify
+          }}</span>
+          <v-chip
+            color="black"
+            class="ml-2"
+            light
+            outlined
+            x-small
+            @click.prevent="$router.push('?modal=walletNetwork')"
+          >
             <v-icon left x-small color="black" class="⬤">
               ⬤
             </v-icon>
@@ -42,7 +51,7 @@
       </v-list>
 
       <v-row class="actions px-3 mt-3" dense>
-        <v-col>
+        <v-col v-if="wallet.keyPair">
           <v-btn
             large
             dark

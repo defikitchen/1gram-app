@@ -95,6 +95,7 @@ export interface CreateWalletOptions {
   path?: string;
   privateKey?: string;
   workchain?: 0 | -1;
+  address?: string;
 }
 
 export const syncCache = (state: WalletState) => {
@@ -250,6 +251,49 @@ const actions = defineActions({
       )
     };
     return keyData;
+  },
+
+  async addViewWallet(
+    ctx,
+    settings: { address: string; network: Network; name?: string }
+  ) {
+    const { state, commit, dispatch } = moduleCtx(ctx);
+    if (state.forging) throw new Error("Busy forging wallet");
+    commit.setForging(true);
+    commit.setForgingString("Preparing");
+    const name =
+      settings?.name ||
+      getNextName(
+        "View Wallet",
+        state.wallets.map(w => w?.name)
+      );
+    const wallet: Wallet = {
+      address: settings.address,
+      network: settings.network,
+      name,
+      transactions: [],
+      backedUp: true,
+      balance: 0,
+      erc20Tokens: [],
+      imported: true,
+      keyPair: "",
+      lastUsed: new Date().getTime(),
+      messages: [],
+      receipts: []
+    };
+    console.log(wallet);
+    commit.addWallet(wallet);
+    commit.setWallet(wallet);
+    commit.setForging(false);
+    commit.setForgingString("Updating wallet");
+    await dispatch.updateWallet({ address: wallet.address, force: true });
+
+    // force backup on first non-imported wallet
+    // const forceBackup =
+    //   !wallet.imported && state.wallets.filter(w => !w.imported).length === 1;
+    commit.setForgingString("");
+    router.push("/wallet");
+    return wallet;
   },
   async forgeWallet(ctx, settings: CreateWalletOptions) {
     const { getBalance, createWallet } = useEthereum();

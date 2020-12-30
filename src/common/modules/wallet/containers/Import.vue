@@ -61,8 +61,19 @@
             @change="webReadPrivateKey($event)"
           />
         </v-tab-item>
+
+        <v-tab-item key="Three">
+          <v-textarea
+            v-model="form.address"
+            :disabled="allLoading"
+            :rows="1"
+            auto-grow
+            ref="address"
+            placeholder="Enter address"
+          />
+        </v-tab-item>
       </v-tabs-items>
-      <div v-if="network && network.protocol === 'ton'">
+      <div v-if="network && network.protocol === 'ton' && tab < 2">
         <v-subheader class="px-0">Workchain</v-subheader>
         <v-btn
           small
@@ -106,9 +117,18 @@ import { useVuex } from "@/common/hooks/use-vuex";
 import getPlatform, { Platform } from "@/common/lib/get-platform";
 import { getCache, setCache } from "@/common/lib/cache";
 import { handleError, addTimeoutToPromise } from "@/common/lib/error-handling";
-import { cordovaReadQr, HTMLInputEvent, readQr } from "@/common/lib/open-file";
+import {
+  cordovaReadQr,
+  hexToBytes,
+  HTMLInputEvent,
+  readQr
+} from "@/common/lib/open-file";
 import { validateMnemonic } from "bip39-ts";
 import { forgeTimeout } from "@/common/lib/constants";
+import { Ethers } from "@/common/sdk/web3";
+import { TONClient, setWasmOptions } from "ton-client-web-js";
+import { isAddress } from "@/common/sdk/ton-js-client/client";
+import { Network } from "@/common/models/network";
 
 export default defineComponent({
   setup(props, ctx) {
@@ -117,6 +137,7 @@ export default defineComponent({
     } = useVuex();
     const pk = ref<HTMLInputElement>();
     const phrase = ref<HTMLInputElement>();
+    const address = ref<HTMLInputElement>();
     const qrLoading = ref(false);
     const qr = ref<HTMLInputElement>();
     const isCordova = getPlatform() === Platform.Cordova;
@@ -127,14 +148,16 @@ export default defineComponent({
     const network = computed(() => state.Wallet.network);
     const items = [
       { tab: "One", title: "Secret Phrase" },
-      { tab: "Two", title: "Private Key" }
+      { tab: "Two", title: "Private Key" },
+      { tab: "Three", title: "View only" }
     ];
 
     const defaultForm = {
       privateKey: "",
       mnemonic: "",
       path: "",
-      workchain: 0 as 0 | -1
+      workchain: 0 as 0 | -1,
+      address: ""
     };
 
     const form = ref({ ...defaultForm });
@@ -147,6 +170,7 @@ export default defineComponent({
         setTimeout(() => {
           if (value === 0) phrase.value?.focus();
           if (value === 1) pk.value?.focus();
+          if (value === 2) address.value?.focus();
         }, 600);
       },
       get: () => tabModel.value
@@ -198,6 +222,13 @@ export default defineComponent({
       const key = form.value.privateKey.trim();
       return key.length >= 64 && key.length <= 66;
     });
+    const validAddress = computed(() => {
+      const address = form.value.address.trim();
+      const protocol = network.value?.protocol;
+      if (protocol === "ethereum") return Ethers.utils.isAddress(address);
+      else if (protocol === "ton") return isAddress(address);
+      return false;
+    });
 
     const submit = async () => {
       if (tab.value === 0 && !validMnemonic.value) {
@@ -212,6 +243,8 @@ export default defineComponent({
           "Please use a valid private key. Typicallly 64 or 66 hexadecimal characters long",
           6000
         );
+      } else if (tab.value === 2 && !validAddress.value) {
+        return handleError({}, "Enter a valid address", 6000);
       }
 
       try {
@@ -224,16 +257,22 @@ export default defineComponent({
         )
           privateKey = "0x" + privateKey;
 
-        await addTimeoutToPromise(
-          dispatch.Wallet.forgeWallet({
-            imported: true,
-            mnemonic: form.value.mnemonic || undefined,
-            path: form.value.path || undefined,
-            privateKey,
-            workchain: form.value.workchain
-          }),
-          forgeTimeout
-        );
+        if (tab.value === 2) {
+          await dispatch.Wallet.addViewWallet({
+            address: form.value.address,
+            network: network.value as Network
+          });
+        } else
+          await addTimeoutToPromise(
+            dispatch.Wallet.forgeWallet({
+              imported: true,
+              mnemonic: form.value.mnemonic || undefined,
+              path: form.value.path || undefined,
+              privateKey,
+              workchain: form.value.workchain
+            }),
+            forgeTimeout
+          );
       } catch (error) {
         commit.Wallet.setForging(false);
         handleError(error, error, 6000);
@@ -255,7 +294,9 @@ export default defineComponent({
       qr,
       webReadPrivateKey,
       validPrivateKey,
-      validMnemonic
+      validMnemonic,
+      validAddress,
+      address
     };
   }
 });
