@@ -1,10 +1,10 @@
 import router from "@/router";
 import { computed, SetupContext } from "@vue/composition-api";
-import { Route } from "vue-router";
+import VueRouter, { Route } from "vue-router";
 import { MetaProps } from "../routes";
 
 export const useRouter = () => {
-  return router;
+  return router as VueRouter;
 };
 
 export const useMeta = (ctx: SetupContext) => {
@@ -12,10 +12,10 @@ export const useMeta = (ctx: SetupContext) => {
   return meta;
 };
 
-export const useRoute = (ctx: SetupContext) => {
+export const useRoute = () => {
   interface TypedRoute extends Route {
     meta: MetaProps;
   }
-  const route = computed(() => ctx.root.$route as TypedRoute);
+  const route = computed(() => useRouter().app.$route);
   return route;
 };

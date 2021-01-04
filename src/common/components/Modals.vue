@@ -3,6 +3,24 @@
     <portal-target name="modals" />
 
     <BaseDialog
+      v-model="modals.qr.value"
+      title="Scan QR"
+      :width="600"
+      name="modal-qr"
+    >
+      <qrcode-stream v-if="modals.qr.value" @decode="onDecode"></qrcode-stream>
+      <v-text-field
+        class="ma-0 py-0"
+        readonly
+        rounded
+        :value="qr"
+        hide-details
+        placeholder="Waiting for input..."
+        :loading="!qr"
+      />
+    </BaseDialog>
+
+    <BaseDialog
       v-model="modals.currency.value"
       title="Currency"
       :width="600"
@@ -82,7 +100,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ComputedRef } from "@vue/composition-api";
+import {
+  defineComponent,
+  computed,
+  ComputedRef,
+  ref
+} from "@vue/composition-api";
 import PinFlow from "@/common/containers/PinFlow.vue";
 import AddContact from "@/common/modules/wallet/components/AddContact.vue";
 import AddNetwork from "@/common/modules/wallet/components/AddNetwork.vue";
@@ -94,6 +117,7 @@ import { useRouter, useRoute } from "@/common/hooks/use-router";
 import { useVuex } from "@/common/hooks/use-vuex";
 import { Network } from "@/common/models/network";
 import { makeid } from "@/common/lib/makeid";
+import { useQr } from "../hooks/use-qr";
 
 export default defineComponent({
   components: {
@@ -111,8 +135,9 @@ export default defineComponent({
     const {
       store: { state, commit, getters, dispatch }
     } = useVuex();
-    const route = useRoute(ctx);
+    const route = useRoute();
     const wallet = computed(() => getters.Wallet.wallet);
+    const { qr } = useQr();
 
     const pinDialog = computed({
       get: () => state.Common.Login.pinDialog,
@@ -134,7 +159,8 @@ export default defineComponent({
       "walletMenu",
       "currency",
       "contacts",
-      "walletNetwork"
+      "walletNetwork",
+      "qr"
     ];
 
     const modals: ComputedRef<{ [key: string]: { value: boolean } }> = computed(
@@ -166,6 +192,10 @@ export default defineComponent({
       await dispatch.Wallet.updateWallet({ address, force: true });
     };
 
+    const onDecode = (value: string) => {
+      qr.value = value;
+    };
+
     return {
       pinDialog,
       closeModals,
@@ -174,7 +204,9 @@ export default defineComponent({
       openModal,
       addNetwork,
       wallet,
-      selectNetwork
+      selectNetwork,
+      onDecode,
+      qr
     };
   }
 });

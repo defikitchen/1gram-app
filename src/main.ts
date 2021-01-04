@@ -35,6 +35,7 @@ import {
   fromSatoshi,
   toSatoshi
 } from "@/common/lib/format";
+import VueQrcodeReader from "vue-qrcode-reader";
 import { usePrices } from "./common/hooks/use-prices";
 
 window.Vue = Vue as any;
@@ -51,6 +52,8 @@ Vue.use(VuetifyDialog, {
 Vue.use(Vue2Filters);
 Vue.use(PortalVue);
 Vue.use(Vuetify);
+Vue.use(VueQrcodeReader);
+
 Vue.directive("help", Help);
 
 Vue.filter("token", token);

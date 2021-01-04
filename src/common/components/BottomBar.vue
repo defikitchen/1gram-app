@@ -69,7 +69,7 @@ export default defineComponent({
     const {
       store: { getters }
     } = useVuex();
-    const route = useRoute(ctx);
+    const route = useRoute();
 
     const disabled = computed(() => route.value.path === "/welcome");
 

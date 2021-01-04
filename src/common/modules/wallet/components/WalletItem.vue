@@ -23,7 +23,14 @@
         <v-list-item-title
           name="wallet-item-name"
           class="wallet-item__name font-weight-bold"
-          >{{ wallet.name }}</v-list-item-title
+        >
+          {{ wallet.name }}
+          <v-icon
+            v-if="!wallet.keyPair"
+            small
+            class="half-transparent ml-1 mt-n1"
+            >remove_red_eye</v-icon
+          ></v-list-item-title
         >
         <v-list-item-subtitle class="wallet-item__addr overflow-initial">
           <span

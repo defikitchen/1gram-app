@@ -50,7 +50,7 @@
             placeholder="Enter private key"
             hint="64 charachters code that looks something like 4385d7...7faf"
             :append-outer-icon="'qr_code'"
-            @click:append-outer="scanQr"
+            @click:append-outer="scanPrivateKey"
           />
 
           <input
@@ -70,6 +70,8 @@
             auto-grow
             ref="address"
             placeholder="Enter address"
+            :append-outer-icon="'qr_code'"
+            @click:append-outer="scanAddress"
           />
         </v-tab-item>
       </v-tabs-items>
@@ -126,9 +128,9 @@ import {
 import { validateMnemonic } from "bip39-ts";
 import { forgeTimeout } from "@/common/lib/constants";
 import { Ethers } from "@/common/sdk/web3";
-import { TONClient, setWasmOptions } from "ton-client-web-js";
 import { isAddress } from "@/common/sdk/ton-js-client/client";
 import { Network } from "@/common/models/network";
+import { useQr } from "@/common/hooks/use-qr";
 
 export default defineComponent({
   setup(props, ctx) {
@@ -151,6 +153,17 @@ export default defineComponent({
       { tab: "Two", title: "Private Key" },
       { tab: "Three", title: "View only" }
     ];
+    const { getQr } = useQr();
+
+    const scanPrivateKey = async () => {
+      const qr = await getQr();
+      if (qr) form.value.privateKey = qr;
+    };
+
+    const scanAddress = async () => {
+      const qr = await getQr();
+      if (qr) form.value.address = qr;
+    };
 
     const defaultForm = {
       privateKey: "",
@@ -208,11 +221,6 @@ export default defineComponent({
         handleError(error, "Not a valid QR code");
       }
       qrLoading.value = false;
-    };
-
-    const scanQr = () => {
-      if (isCordova) cordovaReadPrivateKey();
-      else qr.value?.click();
     };
 
     const validMnemonic = computed(() =>
@@ -280,6 +288,10 @@ export default defineComponent({
       reset();
     };
 
+    const onDecode = (e: any) => {
+      console.log(e);
+    };
+
     return {
       allLoading,
       isCordova,
@@ -288,7 +300,6 @@ export default defineComponent({
       form,
       tab,
       submit,
-      scanQr,
       pk,
       phrase,
       qr,
@@ -296,7 +307,10 @@ export default defineComponent({
       validPrivateKey,
       validMnemonic,
       validAddress,
-      address
+      address,
+      onDecode,
+      scanAddress,
+      scanPrivateKey
     };
   }
 });

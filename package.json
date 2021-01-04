@@ -1,25 +1,25 @@
 {
-  "version": "0.9.0",
   "name": "1gram",
+  "version": "0.10.0",
   "description": "FreeTON Wallet",
   "scripts": {
-    "prebuild": "cp ./node_modules/ton-client-web-js/tonclient.wasm ./public/tonclient.wasm",
-    "analyze": "source-map-explorer 'dist/js/*.js' --no-border-checks",
+    "build": "npm run browser:build",
     "lint": "vue-cli-service lint",
-    "test": "ts-mocha -p tsconfig.json src/__tests__/**/*.ts --timeout 150000",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:install": "electron-builder install-app-deps",
-    "electron:serve": "vue-cli-service electron:serve",
+    "analyze": "source-map-explorer 'dist/js/*.js' --no-border-checks",
     "browser:build": "yarn vue-cli-service build && cp ./dist/index.html ./dist/200.html",
     "browser:start": "yarn vue-cli-service serve",
-    "deploy:surge": "surge ./dist --domain https://1gram.surge.sh",
-    "deploy:surge:ci": "surge ./dist --domain https://1gram.surge.sh --token $SURGE_TOKEN",
     "deploy:production": "firebase deploy --only hosting",
     "deploy:production:ci": "firebase deploy --only hosting --token $FIREBASE_TOKEN",
     "deploy:staging": "firebase hosting:staging:deploy --expires 30d",
     "deploy:staging:ci": "firebase hosting:staging:deploy --expires 30d --token $FIREBASE_TOKEN",
+    "deploy:surge": "surge ./dist --domain https://1gram.surge.sh",
+    "deploy:surge:ci": "surge ./dist --domain https://1gram.surge.sh --token $SURGE_TOKEN",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:install": "electron-builder install-app-deps",
+    "electron:serve": "vue-cli-service electron:serve",
+    "prebuild": "cp ./node_modules/ton-client-web-js/tonclient.wasm ./public/tonclient.wasm",
     "start": "npm run browser:start",
-    "build": "npm run browser:build"
+    "test": "ts-mocha -p tsconfig.json src/__tests__/**/*.ts --timeout 150000"
   },
   "main": "background.js",
   "dependencies": {
@@ -58,6 +58,7 @@
     "qrcode": "^1.4.4",
     "randomstring": "^1.1.5",
     "reflect-metadata": "^0.1.13",
+    "register-service-worker": "^1.7.1",
     "subscriptions-transport-ws": "^0.9.18",
     "ton-client-web-js": "^0.28.0",
     "tweetnacl": "^1.0.3",
@@ -65,7 +66,8 @@
     "vue": "^2.6.10",
     "vue-json-component": "~0.4.1",
     "vue-property-decorator": "^8.1.0",
-    "vue-router": "^3.0.3",
+    "vue-qrcode-reader": "^2.3.16",
+    "vue-router": "^3.4.9",
     "vue2-filters": "^0.7.0",
     "vuetify": "^2.0.4",
     "vuetify-dialog": "^2.0.2",
@@ -79,6 +81,7 @@
     "@vue/cli": "^4.1.2",
     "@vue/cli-plugin-babel": "^4.1.2",
     "@vue/cli-plugin-eslint": "^3.9.0",
+    "@vue/cli-plugin-pwa": "~4.5.0",
     "@vue/cli-plugin-typescript": "^3.9.0",
     "@vue/cli-plugin-unit-jest": "~4.2.3",
     "@vue/cli-service": "^3.9.0",
@@ -119,7 +122,6 @@
     "webpack-vue": "^1.0.0",
     "yarn": "^1.17.3"
   },
-  "v8flags": "--enable-webassembly-threads --enable-experimental-web-platform-features",
   "engines": {
     "node": ">=12.x"
   },
@@ -138,5 +140,6 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/tigerbee/tfn-ui.git"
-  }
+  },
+  "v8flags": "--enable-webassembly-threads --enable-experimental-web-platform-features"
 }

@@ -9,6 +9,16 @@
           label="Network"
         />
       </v-list-item>
+
+      <v-list-item class="my-2">
+        <v-text-field
+          label="Address"
+          v-model="form.address"
+          hide-details
+          append-outer-icon="qr_code"
+          @click:append-outer="scanQr"
+        />
+      </v-list-item>
       <v-list-item class="my-2">
         <v-text-field
           label="Name"
@@ -16,9 +26,6 @@
           v-model="form.name"
           hide-details
         />
-      </v-list-item>
-      <v-list-item class="my-2">
-        <v-text-field label="Address" v-model="form.address" hide-details />
       </v-list-item>
       <v-list-item class="my-2" v-if="form.id">
         <v-btn color="error" outlined block @click="remove(form.id)">
@@ -48,6 +55,7 @@ import { Contact } from "@/common/models/contact";
 import { Network } from "@/common/models/network";
 import { handleError } from "@/common/lib/error-handling";
 import { useRouter } from "@/common/hooks/use-router";
+import { useQr } from "@/common/hooks/use-qr";
 
 export default defineComponent({
   setup(_, ctx) {
@@ -109,6 +117,12 @@ export default defineComponent({
       }
     );
 
+    const scanQr = async () => {
+      const qr = await useQr().getQr();
+      if (!qr) return;
+      await router.push("?modal=addContact&address=" + qr);
+    };
+
     const submit = () => {
       if (!isValid.value)
         return handleError({}, "Please fill out all fields correctly");
@@ -143,7 +157,8 @@ export default defineComponent({
       ),
       nameField,
       submit,
-      remove
+      remove,
+      scanQr
     };
   }
 });

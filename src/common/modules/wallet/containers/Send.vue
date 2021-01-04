@@ -176,6 +176,7 @@ import { decrypt } from "@/common/lib/crypto";
 import { token } from "@/common/lib/format";
 import BigNumber from "bignumber.js";
 import { useEthereum } from "@/common/hooks/use-ethereum";
+import { useQr } from "@/common/hooks/use-qr";
 
 @Component({
   components: {
@@ -287,9 +288,9 @@ export default class Send extends Vue {
     return +(this.form.amount || 0) + this.fee;
   }
 
-  scanQr() {
-    if (this.isCordova) this.cordovaReadQr();
-    else this.$refs.qr.click();
+  async scanQr() {
+    const qr = await useQr().getQr();
+    if (qr) this.form.addr = qr;
   }
 
   async cordovaReadQr() {
