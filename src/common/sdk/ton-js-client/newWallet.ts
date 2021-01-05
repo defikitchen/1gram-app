@@ -1,6 +1,7 @@
 import { addTimeoutToPromise } from "@/common/lib/error-handling";
+import { NetworkName } from "@/common/models/network";
 import { getAccountFromKeyPair, KeyPair } from "..";
-import { gift } from "../ton-node-api";
+import { grant } from "./grant";
 import { initWallet } from "./initWallet";
 import { getAccountFromMnemonic, getMnemonic } from "./mnemonic";
 
@@ -14,14 +15,15 @@ export const deployWallet = async (
     keyPair,
     workchainId
   );
-  const { balance, id, result } = await initWallet(client, deployMessage);
+  console.log(deployMessage, account);
+
+  const { balance, id } = await initWallet(client, deployMessage);
 
   return {
     account,
     deployMessage,
     balance,
-    id,
-    result
+    id
   };
 };
 
@@ -31,6 +33,7 @@ export const newWallet = async (
   mnemonic?: string
 ) => {
   const time = new Date().getTime();
+  const name = (client._name as NetworkName) || "";
 
   mnemonic = mnemonic || (await getMnemonic(client)).mnemonic;
   const { account, deployMessage, keyPair } = await getAccountFromMnemonic(
@@ -39,21 +42,11 @@ export const newWallet = async (
     workchainId
   );
 
+  console.log(mnemonic, account);
+
   let balance = 0;
   let id = "";
-
-  try {
-    //"net.ton.dev",
-    if (["fld.ton.dev"].includes(client._name)) {
-      const promise = Promise.all([
-        gift(account, client._name),
-        initWallet(client, deployMessage)
-      ]);
-      await addTimeoutToPromise(promise, 3 * 60 * 1000);
-    }
-  } catch (e) {
-    console.log("could not initialize", e);
-  }
+  let deployed = false;
 
   const endTime = new Date().getTime();
   const createdIn = endTime - time;
@@ -66,6 +59,7 @@ export const newWallet = async (
     transactionId: id,
     balance,
     mnemonic,
-    deployMessage
+    deployMessage,
+    deployed
   };
 };

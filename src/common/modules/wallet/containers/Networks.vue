@@ -14,10 +14,6 @@
               <v-list-item-subtitle>
                 ID: {{ network.id }}
                 <br />
-                RPC URL: {{ network.RPCURL }}
-                <br />
-                Chain ID: {{ network.chainID }}
-                <br />
                 Symbol: {{ network.symbol }}
                 <br />
                 Block Explorer URL: {{ network.blockExplorerURL }}

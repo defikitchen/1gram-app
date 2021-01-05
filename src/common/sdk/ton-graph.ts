@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import { NetworkName } from "../models/network";
 import { TonMsg, TonTx } from "../models/tx";
 import { GqlClient } from "./gql-client";
 
@@ -10,6 +11,11 @@ export interface Account {
   acc_type_name?: "Active" | "Uninit" | string;
 }
 
+export interface FullAccount extends Account {
+  messages: TonMsg[];
+  tx: TonTx[];
+}
+
 const gqlTestClient = new GqlClient();
 gqlTestClient.init("https://net.ton.dev/graphql");
 
@@ -19,11 +25,24 @@ gqlMainClient.init("https://main.ton.dev/graphql");
 const gqlFldClient = new GqlClient();
 gqlFldClient.init("https://gql.custler.net/graphql");
 
-const getGqlClient = (network = "fld.ton.dev") => {
+const gqlRustClient = new GqlClient();
+gqlMainClient.init("https://rustnet.ton.dev/graphql");
+
+const getGqlClient = (network: NetworkName = "fld.ton.dev") => {
   if (network.indexOf("net.ton.dev") > -1) return gqlTestClient;
   else if (network.indexOf("main.ton.dev") > -1) return gqlMainClient;
   else if (network.indexOf("fld.ton.dev") > -1) return gqlFldClient;
-  else throw new Error("not a valid network");
+  else if (network.indexOf("rustnet.ton.dev") > -1) return gqlRustClient;
+  else {
+    try {
+      const client = new GqlClient();
+      client.init(`https://${network}/graphql`);
+      return client;
+    } catch (error) {
+      console.error({ error });
+      throw new Error("not a valid network");
+    }
+  }
 };
 
 export const getTxHistory = async (account: string, network?: string) => {
@@ -171,8 +190,6 @@ export const getAccount = async (account: string, network?: string) => {
     }
   `;
 
-  const client = getGqlClient(network);
-
   const res = await getGqlClient(network).query<{ accounts: Account[] }>({
     query,
     fetchPolicy: "network",
@@ -182,4 +199,18 @@ export const getAccount = async (account: string, network?: string) => {
   });
 
   return (res?.accounts || [])[0];
+};
+
+export const getFullAccount = async (
+  address: string,
+  network?: NetworkName
+): Promise<FullAccount> => {
+  const [account, history] = await Promise.all([
+    getAccount(address, network),
+    getTxHistory(address, network)
+  ]);
+  return {
+    ...account,
+    ...history
+  };
 };

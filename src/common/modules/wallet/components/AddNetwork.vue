@@ -31,12 +31,6 @@
     />
     <v-text-field label="Name" v-model="form.name" :rules="nameRules" />
     <v-text-field label="Decimals" v-model.number="form.decimals" />
-    <v-text-field label="RPC URL" v-model="form.RPCURL" :rules="RPCURLRules" />
-    <v-text-field
-      label="Chain ID"
-      type="number"
-      v-model.number="form.chainID"
-    />
     <v-text-field label="Symbol" v-model="form.symbol" />
     <v-text-field label="Block Explorer URL" v-model="form.blockExplorerURL" />
     <v-btn block large color="accent" type="submit">Add Network</v-btn>
@@ -57,7 +51,6 @@ export default defineComponent({
     const defaultForm = defaultTonNetwork;
     const form = ref({ ...defaultForm });
     const IDRules = ref([v => !!v || "ID is required"]);
-    const RPCURLRules = ref([v => !!v || "RPC URL is required"]);
     const nameRules = ref([v => !!v || "Name is required"]);
 
     const submit = () => {
@@ -77,7 +70,6 @@ export default defineComponent({
       defaultForm,
       formModel,
       IDRules,
-      RPCURLRules,
       nameRules,
       formRef,
       submit

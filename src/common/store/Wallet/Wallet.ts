@@ -2,13 +2,13 @@ import randomstring from "randomstring";
 import { defineGetters, defineMutations } from "direct-vuex";
 import { defineModule, defineActions } from "direct-vuex";
 import { Network } from "@/common/models/network";
-import { notify } from "@/common/store";
+import store, { notify } from "@/common/store";
 import { moduleActionContext } from "@/common/store";
 import router from "@/router";
 import { dialog } from "@/main";
 import { setCache, getCache, fromCache } from "@/common/lib/cache";
 import { getMnemonic } from "@/common/lib/bip44";
-import { addTimeoutToPromise, handleError } from "@/common/lib/error-handling";
+import { handleError } from "@/common/lib/error-handling";
 import { encrypt, decrypt } from "@/common/lib/crypto";
 
 import {
@@ -35,7 +35,7 @@ import {
   defaultTonNetwork,
   tonDefaultPath
 } from "@/common/lib/constants";
-import { NewWallet } from "@/common/sdk/ton-node-api";
+import { gift, NewWallet } from "@/common/sdk/ton-node-api";
 import { derivePublicKey } from "@/common/sdk/ton-js-client/importWallet";
 import { useERC20 } from "@/common/hooks/use-erc20";
 import { usePrices } from "@/common/hooks/use-prices";
@@ -43,6 +43,8 @@ import { getProvider } from "@/common/sdk/web3/client";
 import { uniqBy } from "lodash";
 import { usePin } from "@/common/hooks/use-pin";
 import { deployWallet } from "@/common/sdk/ton-js-client/newWallet";
+import { grant } from "@/common/sdk/ton-js-client/grant";
+import { pause } from "@/common/lib/helpers";
 
 export const getNextName = (word: string, names: string[]) => {
   const regEx = new RegExp(`\\b${word} \\b(\\d+)$`);
@@ -315,6 +317,7 @@ const actions = defineActions({
     let balance = 0;
     let keyPair!: KeyPair;
     let address = "";
+    let deployed = false;
 
     if (network?.protocol === "ton") {
       commit.setForgingString("Connecting to " + state.network.name);
@@ -341,7 +344,14 @@ const actions = defineActions({
             keyPair ? undefined : path
           )
         : await newWallet(client, settings.workchain ?? 0);
-      balance = "balance" in walletRes ? (walletRes as any).balance : 0;
+      deployed =
+        "deployed" in (walletRes as ImportedWallet | NewWallet)
+          ? (walletRes as NewWallet).deployed
+          : false;
+      balance =
+        "deployed" in (walletRes as ImportedWallet | NewWallet)
+          ? (walletRes as NewWallet).balance
+          : 0;
       mnemonic = walletRes.mnemonic || settings.mnemonic || "";
       keyPair = walletRes.keyPair;
       address = walletRes.account;
@@ -381,6 +391,10 @@ const actions = defineActions({
       erc20Tokens: []
     };
 
+    if (deployed) {
+      wallet.needsDeployment = false;
+    }
+
     if (network?.protocol === "ethereum") {
       commit.setForgingString("Fetching balance");
       wallet.balance = +(await getBalance(wallet));
@@ -405,13 +419,36 @@ const actions = defineActions({
     commit.setForging(false);
 
     commit.setForgingString("Updating wallet");
-    await dispatch.updateWallet({ address: wallet.address, force: true });
+    dispatch.updateWallet({ address, force: true });
 
     // force backup on first non-imported wallet
     // const forceBackup =
     //   !wallet.imported && state.wallets.filter(w => !w.imported).length === 1;
     commit.setForgingString("");
-    router.push("/wallet");
+    store.original.dispatch("Common/startLoading", {
+      command: "startLoadingOverlay",
+      value: "Loading…"
+    });
+
+    router
+      .push("/wallet")
+      .catch(() => store.commit.Common.stopLoading())
+      .finally(() => {
+        console.log(wallet);
+        if (wallet.network.name === "fld.ton.dev") {
+          (async () => {
+            try {
+              commit.setForging(true);
+              await dispatch.grantTONWallet(wallet);
+              await pause(100);
+              await dispatch.deployTONWallet(wallet);
+            } catch (e) {
+              commit.setForging(false);
+              console.log("could not initialize", e);
+            }
+          })();
+        }
+      });
     return wallet;
   },
   /**
@@ -575,12 +612,45 @@ const actions = defineActions({
     });
   },
 
+  async grantTONWallet(ctx, wallet: Wallet): Promise<void> {
+    const { dispatch, commit } = moduleCtx(ctx);
+    if (wallet.network.protocol !== "ton")
+      return handleError("not a TON wallet");
+    if (wallet.network.name === "main.ton.dev") {
+      return handleError("Not available for TON MainNet");
+    }
+
+    commit.setForging(true);
+    commit.setForgingString("Connecting to " + wallet.network.name);
+    const client = await getClient(wallet.network.name);
+
+    try {
+      commit.setForgingString("Fetching address");
+      const balance = await dispatch.updateBalance(wallet.address);
+      if (balance) {
+        handleError(balance, "You already have funds", 7000);
+        return commit.setForging(false);
+      }
+      commit.setForgingString("Granting 100k" + wallet.network.symbol);
+      await grant(client, wallet.address, true);
+      notify({
+        text: "Successfuly received 100k" + wallet.network.symbol
+      });
+      commit.setForgingString("Updating wallet");
+      dispatch.updateWallet({ address: wallet.address, force: true });
+    } catch (e) {
+      handleError(e, "Could not grant wallet", 7000);
+    }
+    commit.setForgingString("");
+    commit.setForging(false);
+  },
+
   async deployTONWallet(ctx, wallet: Wallet): Promise<void> {
-    const { dispatch, state, commit } = moduleCtx(ctx);
+    const { dispatch, commit } = moduleCtx(ctx);
     if (wallet.network.protocol !== "ton")
       return handleError("not a TON wallet");
 
-    const client = await getClient(state?.network?.name as any);
+    const client = await getClient(wallet.network.name);
     const pin = await usePin().getPin();
     if (!pin) return;
     const pair: KeyPair = JSON.parse(decrypt(wallet.keyPair, pin));
@@ -592,7 +662,7 @@ const actions = defineActions({
         handleError(balance, "Your balance is too low to deploy", 7000);
         return commit.setForging(false);
       }
-      await addTimeoutToPromise(deployWallet(client, pair), 60000);
+      await deployWallet(client, pair, +wallet.address.split(":")[0] as -1 | 0);
       notify({
         text: "Successfuly deployed"
       });

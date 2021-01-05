@@ -1,6 +1,6 @@
 {
   "name": "1gram",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "FreeTON Wallet",
   "scripts": {
     "build": "npm run browser:build",

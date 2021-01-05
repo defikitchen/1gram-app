@@ -1,16 +1,15 @@
+import { defaultNetworks } from "@/common/lib/constants";
 import { hexToBytes } from "@/common/lib/open-file";
+import { NetworkName } from "@/common/models/network";
 import { TONClient, setWasmOptions } from "ton-client-web-js";
-import { utils } from "../web3";
 
-export const getClient = async (
-  network: "net.ton.dev" | "main.ton.dev" | "fld.ton.dev" = "fld.ton.dev"
-) => {
+export const getClient = async (network: NetworkName = "fld.ton.dev") => {
   setWasmOptions({
     addHTML: console.log
   });
-  let server: string = network;
-  if (network === "fld.ton.dev") server = "https://gql.custler.net";
-  console.log(server);
+  const graphqlURL = defaultNetworks.find(n => n.name === network)?.graphqlURL;
+  const server = graphqlURL || network;
+  console.log({ server });
   const client = await TONClient.create({
     servers: [server]
   });

@@ -9,7 +9,12 @@
       class="title d-flex align-center py-3"
       :class="{ 'slightly-transparent': deploying }"
     >
-      <span> <v-icon class="mr-2">warning</v-icon>Deployment required </span>
+      <span v-if="!deploying">
+        <v-icon class="mr-2">warning</v-icon>Deployment required
+      </span>
+      <span v-else>
+        <v-icon class="mr-2">warning</v-icon>Deploying wallet...
+      </span>
       <v-spacer />
       <v-btn :loading="deploying" text small class="mr-n3">Deploy</v-btn>
     </v-card-title>

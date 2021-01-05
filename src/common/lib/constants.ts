@@ -18,8 +18,6 @@ export const defaultNetworks: Network[] = [
   {
     id: 396,
     name: "main.ton.dev",
-    RPCURL: "https://main.ton.dev",
-    chainID: -1,
     symbol: "💎",
     blockExplorerURL: "https://ton.live/",
     protocol: "ton",
@@ -29,23 +27,37 @@ export const defaultNetworks: Network[] = [
   {
     id: 396,
     name: "fld.ton.dev",
-    RPCURL: "https://fld.ton.dev",
-    chainID: -1,
     symbol: "🍀",
     blockExplorerURL: "https://fld.ton.live/",
+    graphqlURL: "https://gql.custler.net",
+    protocol: "ton",
+    decimals: 9
+  },
+  {
+    id: 396,
+    name: "rustnet.ton.dev",
+    symbol: "🦀",
+    blockExplorerURL: "https://rustnet.ton.live/",
     protocol: "ton",
     decimals: 9
   },
   {
     id: 396,
     name: "net.ton.dev",
-    RPCURL: "https://net.ton.dev",
-    chainID: -1,
     symbol: "🔶",
     blockExplorerURL: "https://net.ton.live/",
     protocol: "ton",
     decimals: 9
   }
+  // {
+  //   id: 60,
+  //   name: "mainnet",
+  //   symbol: "ETH",
+  //   blockExplorerURL: "https://etherscan.io/",
+  //   protocol: "ethereum",
+  //   decimals: 18,
+  //   etherscanId: tokenList.ETH
+  // }
 ];
 
 export const defaultTonNetwork = defaultNetworks[1];

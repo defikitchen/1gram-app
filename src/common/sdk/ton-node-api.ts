@@ -14,6 +14,7 @@ export interface NewWallet {
   transactionId: string;
   balance: number;
   mnemonic: string;
+  deployed: boolean;
 }
 
 export interface ImportedWallet {

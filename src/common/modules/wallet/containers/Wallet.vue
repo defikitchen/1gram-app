@@ -105,6 +105,31 @@
         <deploy-warning :deploying="forging" />
       </div>
 
+      <v-btn
+        @click="grant"
+        class="mb-6"
+        block
+        large
+        :disabled="forging"
+        v-if="
+          wallet.needsDeployment &&
+            !wallet.balance &&
+            wallet.network.protocol === 'ton' &&
+            wallet.network.name === 'fld.ton.dev'
+        "
+        ><template v-if="!forging"
+          >Request a free 100K{{ wallet.network.symbol }} Grant</template
+        >
+        <template v-else
+          >{{ forgingString || "Granting wallet" }}...
+          <v-progress-circular
+            width="2"
+            size="15"
+            class="ml-2"
+            color="rgba(255,255,255,.3)"
+            indeterminate/></template
+      ></v-btn>
+
       <p
         class="half-transparent py-6 ma-0 text-center"
         v-if="transactions.length < 1 && !wallet.needsDeployment"
@@ -154,7 +179,9 @@
         <v-icon>qr_code</v-icon>
       </v-btn>
       <v-btn icon small @click="update(true)">
-        <v-icon :class="{ 'unclickable spin': updating }">refresh</v-icon>
+        <v-icon :class="{ 'unclickable spin': updating || forging }"
+          >refresh</v-icon
+        >
       </v-btn>
     </portal>
   </Page>
@@ -189,6 +216,7 @@ export default defineComponent({
     const deploy = () => store.dispatch.Wallet.deployTONWallet(wallet.value);
     const copy = (val: string) => useCopy(val);
     const forging = computed(() => store.state.Wallet.forging);
+    const forgingString = computed(() => store.state.Wallet.forgingString);
 
     const price = computed(() => {
       const rate = useUsdPrice(
@@ -246,6 +274,8 @@ export default defineComponent({
       return token(balance || 0, "", network.decimals, 6);
     });
 
+    const grant = () => store.dispatch.Wallet.grantTONWallet(wallet.value);
+
     return {
       prices,
       price,
@@ -263,7 +293,9 @@ export default defineComponent({
       baseCurrency,
       copy,
       deploy,
-      forging
+      forging,
+      forgingString,
+      grant
     };
   }
 });

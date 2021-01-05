@@ -120,7 +120,6 @@ export default defineComponent({
         });
       } catch (error) {
         handleError(error, error, 6000);
-      } finally {
         commit.Wallet.setForging(false);
       }
     };
