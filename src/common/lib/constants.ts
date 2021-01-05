@@ -57,6 +57,14 @@ export const defaultNetworks: Network[] = [
   //   protocol: "ethereum",
   //   decimals: 18,
   //   etherscanId: tokenList.ETH
+  // },
+  // {
+  //   id: 60,
+  //   name: "ropsten",
+  //   symbol: "ETH",
+  //   blockExplorerURL: "https://ropsten.etherscan.io/",
+  //   protocol: "ethereum",
+  //   decimals: 18
   // }
 ];
 

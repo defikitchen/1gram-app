@@ -7,7 +7,9 @@
     <v-list-item
       :input-value="isActive(net)"
       active-class="active"
-      v-for="(net, i) of networks"
+      v-for="(net, i) of networks.filter(
+        n => !active || n.protocol === active.protocol
+      )"
       :key="i"
       @click="selectNetwork(net)"
     >
