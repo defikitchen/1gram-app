@@ -134,17 +134,14 @@ export default defineComponent({
 }
 
 .aligner {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  height: 64px;
 
-  $actions-width: 120px;
-
-  .actions-left,
-  .actions-right {
-    width: $actions-width;
+  @media screen and (max-width: 960px) {
+    height: 55px;
   }
 
   .actions-left > .v-btn:not(:last-child) {
@@ -157,13 +154,25 @@ export default defineComponent({
 
   .actions-right {
     text-align: right;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .actions-left {
+    position: absolute;
+    left: 0;
+    top: 1.5px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .bar-title {
-    width: calc(100% - #{$actions-width * 2});
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .action-portal {

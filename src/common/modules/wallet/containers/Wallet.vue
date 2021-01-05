@@ -3,7 +3,7 @@
     <span class="clickable">
       <portal to="page-title"
         ><span class="clickable-bg" @click="$router.push('?modal=walletMenu')"
-          >{{ wallet.name }}
+          ><span class="ellipsis mr-1">{{ wallet.name }}</span>
           <v-icon small class="mx-n1">expand_more</v-icon></span
         ></portal
       >
@@ -213,7 +213,8 @@ export default defineComponent({
         force
       });
     const stopLoading = () => store.commit.Common.stopLoading();
-    const deploy = () => store.dispatch.Wallet.deployTONWallet(wallet.value);
+    const deploy = () =>
+      store.dispatch.Wallet.deployTONWallet({ wallet: wallet.value });
     const copy = (val: string) => useCopy(val);
     const forging = computed(() => store.state.Wallet.forging);
     const forgingString = computed(() => store.state.Wallet.forgingString);
@@ -274,7 +275,8 @@ export default defineComponent({
       return token(balance || 0, "", network.decimals, 6);
     });
 
-    const grant = () => store.dispatch.Wallet.grantTONWallet(wallet.value);
+    const grant = () =>
+      store.dispatch.Wallet.grantTONWallet({ wallet: wallet.value });
 
     return {
       prices,

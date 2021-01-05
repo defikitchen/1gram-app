@@ -439,9 +439,9 @@ const actions = defineActions({
           (async () => {
             try {
               commit.setForging(true);
-              await dispatch.grantTONWallet(wallet);
+              await dispatch.grantTONWallet({ wallet });
               await pause(100);
-              await dispatch.deployTONWallet(wallet);
+              await dispatch.deployTONWallet({ wallet });
             } catch (e) {
               commit.setForging(false);
               console.log("could not initialize", e);
@@ -612,12 +612,24 @@ const actions = defineActions({
     });
   },
 
-  async grantTONWallet(ctx, wallet: Wallet): Promise<void> {
+  async grantTONWallet(
+    ctx,
+    { wallet, retries = 5 }: { wallet: Wallet; retries?: number }
+  ): Promise<void> {
     const { dispatch, commit } = moduleCtx(ctx);
+    if (retries < 1) {
+      commit.setForging(false);
+      commit.setForgingString("");
+      return handleError(
+        {},
+        "Granting timed out. Problem connecting to the network. Try again later",
+        7000
+      );
+    }
     if (wallet.network.protocol !== "ton")
-      return handleError("not a TON wallet");
+      return handleError({}, "not a TON wallet");
     if (wallet.network.name === "main.ton.dev") {
-      return handleError("Not available for TON MainNet");
+      return handleError({}, "Not available for TON MainNet");
     }
 
     commit.setForging(true);
@@ -639,14 +651,28 @@ const actions = defineActions({
       commit.setForgingString("Updating wallet");
       dispatch.updateWallet({ address: wallet.address, force: true });
     } catch (e) {
-      handleError(e, "Could not grant wallet", 7000);
+      console.log("[retryGrant]", retries - 1, retries);
+      await dispatch.grantTONWallet({ wallet, retries: retries - 1 });
     }
     commit.setForgingString("");
     commit.setForging(false);
   },
 
-  async deployTONWallet(ctx, wallet: Wallet): Promise<void> {
+  async deployTONWallet(
+    ctx,
+    { wallet, retries = 5 }: { wallet: Wallet; retries?: number }
+  ): Promise<void> {
     const { dispatch, commit } = moduleCtx(ctx);
+    if (retries < 1) {
+      commit.setForging(false);
+      commit.setForgingString("");
+      return handleError(
+        {},
+        "Wallet deployment timed out. Problem connecting to the network. Try again later",
+        7000
+      );
+    }
+
     if (wallet.network.protocol !== "ton")
       return handleError("not a TON wallet");
 
@@ -668,11 +694,8 @@ const actions = defineActions({
       });
       dispatch.updateWallet({ address: wallet.address, force: true });
     } catch (e) {
-      handleError(
-        e,
-        "Could not deploy wallet. Do you have enough funds?",
-        7000
-      );
+      console.log("[retryDeploy]", retries - 1, retries);
+      await dispatch.deployTONWallet({ wallet, retries: retries - 1 });
     }
     commit.setForging(false);
   },

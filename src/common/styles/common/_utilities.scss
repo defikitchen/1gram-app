@@ -10,12 +10,20 @@
   overflow: auto;
 }
 
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100vw - 220px);
+  display: inline-block;
+  vertical-align: top;
+}
+
 .clickable-bg {
   display: inline-block;
   position: relative;
   cursor: pointer;
   line-height: 1;
-
   $offset: 10px;
 
   &:after {

@@ -6,7 +6,7 @@ export const waitFor = async (
   address: string,
   query: "balance" | "active",
   interval = 2000,
-  timeout = 60000
+  timeout = 18000
 ): Promise<false | Account> => {
   const checkQuery = async () => {
     const account = await getAccount(address, network);
