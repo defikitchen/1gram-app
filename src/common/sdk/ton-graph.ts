@@ -1,6 +1,8 @@
 import gql from "graphql-tag";
-import { NetworkName } from "../models/network";
+import { defaultNetworks, defaultTonNetwork } from "../lib/constants";
+import { Network, NetworkName } from "../models/network";
 import { TonMsg, TonTx } from "../models/tx";
+import store from "../store";
 import { GqlClient } from "./gql-client";
 
 export interface Account {
@@ -16,32 +18,23 @@ export interface FullAccount extends Account {
   tx: TonTx[];
 }
 
-const gqlTestClient = new GqlClient();
-gqlTestClient.init("https://net.ton.dev/graphql");
+const getGqlClient = (
+  networkName: NetworkName = defaultTonNetwork.name as string
+) => {
+  const network: Network = defaultNetworks.find(
+    n => n.name === networkName
+  ) as Network;
+  const graphqlURL = network && network.graphqlURL;
+  const url = graphqlURL || `https://${networkName}/graphql`;
+  console.log({ url });
 
-const gqlMainClient = new GqlClient();
-gqlMainClient.init("https://main.ton.dev/graphql");
-
-const gqlFldClient = new GqlClient();
-gqlFldClient.init("https://gql.custler.net/graphql");
-
-const gqlRustClient = new GqlClient();
-gqlMainClient.init("https://rustnet.ton.dev/graphql");
-
-const getGqlClient = (network: NetworkName = "fld.ton.dev") => {
-  if (network.indexOf("net.ton.dev") > -1) return gqlTestClient;
-  else if (network.indexOf("main.ton.dev") > -1) return gqlMainClient;
-  else if (network.indexOf("fld.ton.dev") > -1) return gqlFldClient;
-  else if (network.indexOf("rustnet.ton.dev") > -1) return gqlRustClient;
-  else {
-    try {
-      const client = new GqlClient();
-      client.init(`https://${network}/graphql`);
-      return client;
-    } catch (error) {
-      console.error({ error });
-      throw new Error("not a valid network");
-    }
+  const client = new GqlClient();
+  try {
+    client.init(url);
+    return client;
+  } catch (error) {
+    console.error({ error });
+    throw new Error("not a valid network");
   }
 };
 
@@ -120,15 +113,17 @@ export const getTxHistory = async (account: string, network?: string) => {
     }
   `;
 
+  const client = getGqlClient(network);
+
   const [msgRes, txRes] = await Promise.all([
-    getGqlClient(network).query<{ messages: TonMsg[] }>({
+    client.query<{ messages: TonMsg[] }>({
       query: msgQuery,
       fetchPolicy: "network",
       variables: {
         account
       }
     }),
-    getGqlClient(network).query<{ tx: TonTx[] }>({
+    client.query<{ tx: TonTx[] }>({
       query: txQuery,
       fetchPolicy: "network",
       variables: {

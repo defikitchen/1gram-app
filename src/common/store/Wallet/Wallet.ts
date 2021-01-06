@@ -663,6 +663,7 @@ const actions = defineActions({
     { wallet, retries = 5 }: { wallet: Wallet; retries?: number }
   ): Promise<void> {
     const { dispatch, commit } = moduleCtx(ctx);
+    let copy = { ...wallet };
     if (retries < 1) {
       commit.setForging(false);
       commit.setForgingString("");
@@ -673,29 +674,29 @@ const actions = defineActions({
       );
     }
 
-    if (wallet.network.protocol !== "ton")
-      return handleError("not a TON wallet");
+    if (copy.network.protocol !== "ton") return handleError("not a TON wallet");
 
-    const client = await getClient(wallet.network.name);
+    const client = await getClient(copy.network.name);
+    console.log(copy.network.name, client, client._name);
     const pin = await usePin().getPin();
     if (!pin) return;
-    const pair: KeyPair = JSON.parse(decrypt(wallet.keyPair, pin));
+    const pair: KeyPair = JSON.parse(decrypt(copy.keyPair, pin));
     commit.setForging(true);
 
     try {
-      const balance = await dispatch.updateBalance(wallet.address);
+      const balance = await dispatch.updateBalance(copy.address);
       if (!balance) {
         handleError(balance, "Your balance is too low to deploy", 7000);
         return commit.setForging(false);
       }
-      await deployWallet(client, pair, +wallet.address.split(":")[0] as -1 | 0);
+      await deployWallet(client, pair, +copy.address.split(":")[0] as -1 | 0);
       notify({
         text: "Successfuly deployed"
       });
-      dispatch.updateWallet({ address: wallet.address, force: true });
+      dispatch.updateWallet({ address: copy.address, force: true });
     } catch (e) {
       console.log("[retryDeploy]", retries - 1, retries);
-      await dispatch.deployTONWallet({ wallet, retries: retries - 1 });
+      await dispatch.deployTONWallet({ wallet: copy, retries: retries - 1 });
     }
     commit.setForging(false);
   },
@@ -795,6 +796,10 @@ const actions = defineActions({
     if (result === false) return;
     else if (result === "REMOVE") {
       commit.removeWallet(wallet);
+      const lastUsed = (state.wallets || []).sort((a, b) =>
+        a.lastUsed > b.lastUsed ? -1 : 0
+      )[0];
+      commit.setWallet(lastUsed);
       router.push("/portfolio").catch();
     } else dispatch.removeWallet(wallet);
   }

@@ -1,19 +1,28 @@
-import { defaultNetworks } from "@/common/lib/constants";
+import { defaultNetworks, defaultTonNetwork } from "@/common/lib/constants";
 import { hexToBytes } from "@/common/lib/open-file";
-import { NetworkName } from "@/common/models/network";
+import { Network, NetworkName } from "@/common/models/network";
+import store from "@/common/store";
 import { TONClient, setWasmOptions } from "ton-client-web-js";
 
-export const getClient = async (network: NetworkName = "fld.ton.dev") => {
+export const getClient = async (
+  networkName: NetworkName = defaultTonNetwork.name
+) => {
   setWasmOptions({
     addHTML: console.log
   });
-  const graphqlURL = defaultNetworks.find(n => n.name === network)?.graphqlURL;
-  const server = graphqlURL || network;
-  console.log({ server });
+  const networks = [...defaultNetworks, ...store.state.Wallet.networks];
+
+  const network: Network =
+    networks.find(n => n.name === networkName) || defaultTonNetwork;
+
+  let server = network.graphqlURL || `https://${networkName}`;
+
+  if (server.endsWith("/")) server = server.slice(0, -1);
+  if (server.endsWith("graphql")) server = server.slice(0, -7);
   const client = await TONClient.create({
     servers: [server]
   });
-  client._name = network;
+  client._name = network.name;
   return client;
 };
 

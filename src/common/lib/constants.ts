@@ -29,7 +29,7 @@ export const defaultNetworks: Network[] = [
     name: "fld.ton.dev",
     symbol: "🍀",
     blockExplorerURL: "https://fld.ton.live/",
-    graphqlURL: "https://gql.custler.net",
+    graphqlURL: "https://gql.custler.net/graphql",
     protocol: "ton",
     decimals: 9
   },

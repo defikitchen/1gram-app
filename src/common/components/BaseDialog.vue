@@ -3,34 +3,42 @@
     v-model="model"
     :width="width"
     :class="{ 'is--open': model }"
-    overlay-opacity=".5"
+    overlay-opacity=".8"
     :name="name"
+    :overlay-color="$vuetify.theme.dark ? 'black' : 'white'"
   >
     <v-card>
-      <v-toolbar :color="color" class="base-dialog__header" light>
+      <v-toolbar
+        class="base-dialog__header"
+        color="$vuetify.theme.dark ? rgba(255,255,255,.05) : rgba(0,0,0,.05)"
+        elevation="0"
+      >
         <v-btn
           rounded
           icon
           v-if="back"
           @click="$emit('back')"
-          class="dialog__header__back"
+          class="dialog__header__back half-transparent"
         >
           <v-icon>keyboard_backspace</v-icon>
         </v-btn>
+        <v-btn icon v-else class="unclickable d-transparent"></v-btn>
+        <v-spacer />
 
-        <v-toolbar-title>
-          <span class="font-weight-medium">{{ title }}</span>
-        </v-toolbar-title>
+        <v-subheader class="px-0 list-header text-center">{{
+          title
+        }}</v-subheader>
         <v-spacer />
         <v-btn
           rounded
           icon
           @click="$emit('input', false)"
-          class="dialog__header__close"
+          class="dialog__header__close half-transparent"
         >
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
+      <v-divider />
 
       <slot />
     </v-card>

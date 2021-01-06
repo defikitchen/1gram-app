@@ -9,12 +9,16 @@ export const waitFor = async (
   timeout = 18000
 ): Promise<false | Account> => {
   const checkQuery = async () => {
-    const account = await getAccount(address, network);
-    console.log(`[waitFor][${query}] polling`, { account });
-    if (query === "balance" && account?.balance) return account;
-    else if (query === "active" && account?.acc_type_name === "Active")
-      return account;
-    else return false;
+    try {
+      const account = await getAccount(address, network);
+      console.log(`[waitFor][${query}] polling`, { address, network, account });
+      if (query === "balance" && account?.balance) return account;
+      else if (query === "active" && account?.acc_type_name === "Active")
+        return account;
+      else return false;
+    } catch {
+      return false;
+    }
   };
   return new Promise((res, rej) => {
     let timeoutTimer: any;

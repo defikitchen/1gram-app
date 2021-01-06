@@ -3,8 +3,7 @@
     <span class="clickable">
       <portal to="page-title"
         ><span class="clickable-bg" @click="$router.push('?modal=walletMenu')"
-          ><span class="ellipsis mr-1">{{ wallet.name }}</span>
-          <v-icon small class="mx-n1">expand_more</v-icon></span
+          >Wallet <v-icon small class="mx-n1">expand_more</v-icon></span
         ></portal
       >
 
@@ -175,9 +174,9 @@
         <v-icon>settings</v-icon>
       </v-btn>
 
-      <v-btn icon small @click="receive()">
+      <!-- <v-btn icon small @click="receive()">
         <v-icon>qr_code</v-icon>
-      </v-btn>
+      </v-btn> -->
       <v-btn icon small @click="update(true)">
         <v-icon :class="{ 'unclickable spin': updating || forging }"
           >refresh</v-icon
