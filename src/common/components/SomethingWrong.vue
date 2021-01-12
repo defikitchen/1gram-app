@@ -36,65 +36,84 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Emit, Watch } from "vue-property-decorator";
-import Page from "@/common/components/Page.vue";
-import PageContent from "@/common/components/PageContent.vue";
-import PageFooter from "@/common/components/PageFooter.vue";
-import store from "@/common/store";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  watch
+} from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
 
-@Component({
-  components: {
-    Page,
-    PageContent,
-    PageFooter
-  }
-})
-export default class SomethingWrong extends Vue {
-  @Prop({
-    default: "Try again or if this this problem keeps occuring contact support"
-  })
-  message!: string;
-  collapsed = false;
-  @Prop({ default: "Something went wrong" }) title!: string;
-  @Prop({ default: "An unknown error occured" }) error!: any;
+export default defineComponent({
+  props: {
+    message: {
+      default:
+        "Try again or if this this problem keeps occuring contact support"
+    },
+    title: {
+      default: "Something went wrong"
+    },
+    error: {
+      default: "An unknown error occured"
+    }
+  },
+  setup(_props, ctx) {
+    const { store } = useVuex();
+    const expert = computed(
+      () => store.state.Common.Settings.mode === "expert"
+    );
+    const stopLoading = store.commit.Common.stopLoading;
 
-  mounted() {
-    this.stopLoading();
-  }
+    onMounted(() => {
+      stopLoading();
+    });
 
-  get expert() {
-    return store.state.Common.Settings.mode === "expert";
-  }
-
-  // stop loading on route params change
-  @Watch("message")
-  @Watch("title")
-  @Watch("error")
-  @Watch("$route.meta.props")
-  stopLoading() {
-    const { commit } = store;
-    commit.Common.stopLoading();
-  }
-
-  async back() {
-    await this.$router.replace("/force-rerender");
-    this.$router.go(-1);
-  }
-
-  get props() {
-    // get props from route.meta.props or passed component props
-    const componentProps = {
-      message: this.message,
-      title: this.title,
-      error: this.error
+    const back = async () => {
+      await ctx.root.$router.replace("/force-rerender");
+      ctx.root.$router.go(-1);
     };
-    const props = this.$route.meta.props || componentProps;
-    return props;
-  }
 
-  get errorParsed() {
-    const { error } = this.props;
-    return error === "string" ? error : JSON.stringify(error, null, 2);
+    const props = computed(() => {
+      // get props from route.meta.props or passed component props
+      const componentProps = {
+        message: _props.message,
+        title: _props.title,
+        error: _props.error
+      };
+      const props = ctx.root.$route.meta.props || componentProps;
+      return props;
+    });
+
+    const errorParsed = computed(() => {
+      const { error } = _props;
+      try {
+        return error === "string" ? error : JSON.stringify(error, null, 2);
+      } catch {
+        return "";
+      }
+    });
+
+    const changes = computed(() => {
+      return [
+        _props?.message,
+        _props?.title,
+        _props?.error,
+        ctx.root.$route.meta.props
+      ];
+    });
+
+    watch(() => changes.value, stopLoading, {
+      immediate: true,
+      deep: true
+    });
+
+    return {
+      stopLoading,
+      expert,
+      back,
+      props,
+      errorParsed
+    };
   }
-}
+});
 </script>

@@ -263,7 +263,6 @@
 </template>
 
 <script lang="ts">
-import "reflect-metadata";
 import { notify } from "@/common/store";
 import { getColor } from "../../../lib/identicon";
 import { decrypt } from "@/common/lib/crypto";

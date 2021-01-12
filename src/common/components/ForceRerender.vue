@@ -1,18 +1,19 @@
-<template><div></div></template>
+<template><div>&nbsp;</div> </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch } from "vue-property-decorator";
+import { defineComponent, onMounted, onUnmounted } from "@vue/composition-api";
 
-@Component({})
-export default class ForceRerender extends Vue {
-  timer: any;
+export default defineComponent({
+  setup(_, ctx) {
+    let timer: any;
 
-  mounted() {
-    this.timer = setInterval(() => this.$router.go(-1), 200);
+    onMounted(() => {
+      timer = setInterval(() => ctx.root.$router.go(-1), 200);
+    });
+
+    onUnmounted(() => {
+      clearInterval(timer);
+    });
   }
-
-  destroyed() {
-    clearInterval(this.timer);
-  }
-}
+});
 </script>

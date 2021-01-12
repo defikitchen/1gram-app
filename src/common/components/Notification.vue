@@ -28,10 +28,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
 import { Notification as NotificationModel } from "@/common/models/notification";
 import { pause } from "../lib/helpers";
-import { RootState } from "../store";
 import {
   computed,
   defineComponent,

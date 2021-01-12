@@ -16,21 +16,21 @@
     <div class="keyboard">
       <v-row>
         <v-col v-for="i of [1, 2, 3]" :key="i">
-          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key-' + i">
+          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key' + i">
             {{ i }}
           </v-btn>
         </v-col>
       </v-row>
       <v-row>
         <v-col v-for="i of [4, 5, 6]" :key="i">
-          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key-' + i">
+          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key' + i">
             {{ i }}
           </v-btn>
         </v-col>
       </v-row>
       <v-row>
         <v-col v-for="i of [7, 8, 9]" :key="i">
-          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key-' + i">
+          <v-btn x-large fab :color="color" @click="enter(i)" :ref="'key' + i">
             {{ i }}
           </v-btn>
         </v-col>
@@ -38,7 +38,7 @@
       <v-row>
         <v-col>&nbsp;</v-col>
         <v-col>
-          <v-btn x-large fab :color="color" @click="enter(0)" :ref="'key-' + 0"
+          <v-btn x-large fab :color="color" @click="enter(0)" :ref="'key' + 0"
             >0</v-btn
           >
         </v-col>
@@ -49,7 +49,7 @@
             fab
             class="half-transparent backspace"
             @click="backspace()"
-            :ref="'backspace'"
+            ref="del"
           >
             <v-icon>backspace</v-icon>
           </v-btn>
@@ -60,68 +60,107 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch, Prop } from "vue-property-decorator";
-import store from "../store";
+import {
+  defineComponent,
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  Ref,
+  reactive
+} from "@vue/composition-api";
+import { Vue } from "vue-property-decorator";
 
-@Component({})
-export default class PinPad extends Vue {
-  @Prop({ default: "" }) value!: string;
-  @Prop({ default: "Choose a PIN code" }) msg!: string;
-  @Prop({ default: true }) open!: boolean;
-  color = "rgba(255, 255, 255, .05)";
-
-  get pin() {
-    return this.value;
-  }
-  set pin(pin: string) {
-    this.$emit("input", pin);
-    if (pin.length === 6 && pin !== this.value) {
-      setTimeout(() => this.$emit("submit", pin), 200);
+export default defineComponent({
+  props: {
+    value: {
+      default: ""
+    },
+    msg: {
+      default: "Choose a PIN code"
+    },
+    open: {
+      default: true
     }
-  }
+  },
+  setup(props, { emit }) {
+    const color = "rgba(255, 255, 255, .05)";
+    const keyMap = reactive({
+      del: ref<null | Vue>(null),
+      key0: ref<null | Vue>(null),
+      key1: ref<null | Vue>(null),
+      key2: ref<null | Vue>(null),
+      key3: ref<null | Vue>(null),
+      key4: ref<null | Vue>(null),
+      key5: ref<null | Vue>(null),
+      key6: ref<null | Vue>(null),
+      key7: ref<null | Vue>(null),
+      key8: ref<null | Vue>(null),
+      key9: ref<null | Vue>(null)
+    });
 
-  enter(value: number) {
-    if (this.pin.length === 6) return;
-    this.pin += value;
-  }
+    const pin = computed({
+      get: () => props.value,
+      set(value: string) {
+        emit("input", value);
+        if (value.length === 6 && value !== props.value) {
+          setTimeout(() => emit("submit", value), 200);
+        }
+      }
+    });
 
-  backspace() {
-    this.pin = this.pin.substr(0, this.pin.length - 1);
-  }
+    const enter = (value: number) => {
+      if (pin.value.length === 6) return;
+      pin.value += value;
+    };
 
-  mounted() {
-    document.addEventListener("keydown", this.keydown);
-  }
+    const backspace = () => {
+      pin.value = pin.value.substr(0, pin.value.length - 1);
+    };
 
-  destroyed() {
-    document.removeEventListener("keydown", this.keydown);
-  }
+    onMounted(() => {
+      document.addEventListener("keydown", keydown);
+    });
 
-  keydown(e) {
-    if (!this.open) return;
-    const focus = (ref: any) => {
-      try {
-        const refs = this.$refs as any;
-        const el = () =>
-          refs[ref] && refs[ref].$el ? refs[ref].$el : refs[ref][0].$el;
-        setTimeout(() => el().focus(), 50);
-        setTimeout(() => el().blur(), 200);
-      } catch {
-        //  nothing
+    onUnmounted(() => {
+      document.removeEventListener("keydown", keydown);
+    });
+
+    const keydown = (e: KeyboardEvent) => {
+      if (!props.open) return;
+      const focus = (name: string) => {
+        try {
+          const el = (): HTMLInputElement | undefined =>
+            keyMap[name] &&
+            ((keyMap[name] as Ref<Vue>).value?.$el as HTMLInputElement);
+          setTimeout(() => el()?.focus(), 50);
+          setTimeout(() => el()?.blur(), 200);
+        } catch {
+          //  nothing
+        }
+      };
+
+      if (e.code === "Backspace") {
+        backspace();
+        focus("del");
+      } else if (
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(e.key)
+      ) {
+        enter(+e.key);
+        focus("key" + e.key);
       }
     };
 
-    if (e.code === "Backspace") {
-      this.backspace();
-      focus("backspace");
-    } else if (
-      ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(e.key)
-    ) {
-      this.enter(+e.key);
-      focus("key-" + e.key);
-    }
+    return {
+      color,
+      pin,
+      enter,
+      backspace,
+      keydown,
+      ...keyMap
+    };
   }
-}
+});
 </script>
 
 <style>

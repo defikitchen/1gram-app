@@ -18,4 +18,5 @@ export interface Network {
   decimals: number;
   etherscanId?: number;
   graphqlURL?: string;
+  giverAddress?: string;
 }

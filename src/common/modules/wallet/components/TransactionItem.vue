@@ -55,7 +55,6 @@
 
 <script lang="ts">
 import { Tx } from "@/common/models/tx";
-import BigNumber from "bignumber.js";
 import { Wallet } from "@/common/models/wallet";
 import {
   defineComponent,

@@ -58,92 +58,110 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch } from "vue-property-decorator";
-import store, { notify } from "@/common/store";
-const { commit, state } = store;
+import store from "@/common/store";
 import PinPad from "../components/PinPad.vue";
 import { PinEventBus } from "../store/Common/Login";
 import { handleError } from "../lib/error-handling";
 import { pause } from "../lib/helpers";
 import PageSubtitle from "../components/PageSubtitle.vue";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+  watch
+} from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
 
-@Component({
+export default defineComponent({
   components: {
     PinPad,
     PageSubtitle
-  }
-})
-export default class Template extends Vue {
-  createdPin = "";
-  confirmedPin = "";
-  step: "create" | "confirm" | "enter" = "create";
-  msg = " ";
+  },
+  setup() {
+    const createdPin = ref("");
+    const confirmedPin = ref("");
+    const msg = ref(" ");
+    const step = ref<"create" | "confirm" | "enter">("create");
+    const { store } = useVuex();
 
-  get title() {
-    switch (this.step) {
-      case "create":
-        return "Choose a PIN code";
-      case "confirm":
-        return "Confirm PIN code";
-      default:
-        return "Enter PIN code";
-    }
-  }
+    const enteredPin = computed({
+      get: () => store.state.Common.Login.pinDialogForm,
+      set: store.commit.Common.Login.setPinDialogForm
+    });
 
-  get enteredPin() {
-    return state.Common.Login.pinDialogForm;
-  }
-  set enteredPin(value) {
-    commit.Common.Login.setPinDialogForm(value);
-  }
+    const dialog = computed({
+      get: () => store.state.Common.Login.pinDialog,
+      set: (store.commit.Common.Login as any).setPinDialogForm
+    });
 
-  get dialog() {
-    return state.Common.Login.pinDialog;
-  }
-
-  set dialog(value) {
-    commit.Common.Login.setPinDialog(value);
-  }
-
-  get persistent() {
-    return !!state.Common.Login.pinDialogPersistent;
-  }
-
-  mounted() {
-    commit.Common.stopLoading();
-  }
-
-  createPin() {
-    this.step = "confirm";
-  }
-
-  async confirmPin() {
-    if (this.createdPin && this.confirmedPin === this.createdPin) {
-      try {
-        await store.dispatch.Common.Login.create(this.createdPin);
-        await pause(200);
-        this.enterPin(this.createdPin);
-      } catch (error) {
-        handleError(error, error);
+    const title = computed(() => {
+      switch (step.value) {
+        case "create":
+          return "Choose a PIN code";
+        case "confirm":
+          return "Confirm PIN code";
+        default:
+          return "Enter PIN code";
       }
-    } else {
-      this.confirmedPin = "";
-      this.msg = "PIN codes don't match";
-      setTimeout(() => (this.msg = " "), 1500);
-    }
-  }
+    });
 
-  enterPin(pin: string) {
-    PinEventBus.$emit("submit", pin);
-  }
+    const persistent = computed(() => {
+      return !!store.state.Common.Login.pinDialogPersistent;
+    });
 
-  @Watch("dialog", { deep: true, immediate: true })
-  reset() {
-    this.step = state.Common.Login.pinCreated ? "enter" : "create";
-    this.createdPin = "";
-    this.confirmedPin = "";
+    onMounted(() => {
+      store.commit.Common.stopLoading();
+    });
+
+    const createPin = () => {
+      step.value = "confirm";
+    };
+
+    const confirmPin = async () => {
+      if (createdPin.value && confirmedPin.value === createdPin.value) {
+        try {
+          await store.dispatch.Common.Login.create(createdPin.value);
+          await pause(200);
+          enterPin(createdPin.value);
+        } catch (error) {
+          handleError(error, error);
+        }
+      } else {
+        confirmedPin.value = "";
+        msg.value = "PIN codes don't match";
+        setTimeout(() => (msg.value = " "), 1500);
+      }
+    };
+
+    const enterPin = (pin: string) => {
+      PinEventBus.$emit("submit", pin);
+    };
+
+    const reset = () => {
+      step.value = store.state.Common.Login.pinCreated ? "enter" : "create";
+      createdPin.value = "";
+      confirmedPin.value = "";
+    };
+
+    watch(() => dialog.value, reset, { immediate: true, deep: true });
+
+    return {
+      createdPin,
+      confirmedPin,
+      msg,
+      step,
+      enteredPin,
+      dialog,
+      title,
+      persistent,
+      createPin,
+      enterPin,
+      reset,
+      confirmPin
+    };
   }
-}
+});
 </script>
 
 <style lang="scss">

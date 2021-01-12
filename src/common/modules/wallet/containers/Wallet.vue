@@ -114,7 +114,7 @@
           wallet.needsDeployment &&
             !wallet.balance &&
             wallet.network.protocol === 'ton' &&
-            wallet.network.name === 'fld.ton.dev'
+            wallet.network.giverAddress
         "
         ><template v-if="!forging"
           >Request a free 100K{{ wallet.network.symbol }} Grant</template
@@ -197,7 +197,6 @@ import { token } from "@/common/lib/format";
 import { BigNumber } from "bignumber.js";
 import { useCopy } from "@/common/hooks/use-copy";
 import PageSubtitle from "@/common/components/PageSubtitle.vue";
-import { useERC20 } from "@/common/hooks/use-erc20";
 import DeployWarning from "@/common/modules/wallet/components/DeployWarning.vue";
 
 export default defineComponent({

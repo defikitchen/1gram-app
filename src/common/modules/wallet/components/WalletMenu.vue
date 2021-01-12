@@ -61,14 +61,13 @@ import { defineComponent, computed } from "@vue/composition-api";
 import { useVuex } from "@/common/hooks/use-vuex";
 import { useRouter } from "@/common/hooks/use-router";
 import WalletItem from "./WalletItem.vue";
-import { Wallet } from "ethers";
 
 export default defineComponent({
   components: { WalletItem },
   props: {
     createOnly: Boolean
   },
-  setup(props, ctx) {
+  setup() {
     const { store } = useVuex();
     const router = useRouter();
 

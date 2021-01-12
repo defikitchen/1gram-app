@@ -119,12 +119,7 @@ import { useVuex } from "@/common/hooks/use-vuex";
 import getPlatform, { Platform } from "@/common/lib/get-platform";
 import { getCache, setCache } from "@/common/lib/cache";
 import { handleError, addTimeoutToPromise } from "@/common/lib/error-handling";
-import {
-  cordovaReadQr,
-  hexToBytes,
-  HTMLInputEvent,
-  readQr
-} from "@/common/lib/open-file";
+import { cordovaReadQr, HTMLInputEvent, readQr } from "@/common/lib/open-file";
 import { validateMnemonic } from "bip39-ts";
 import { forgeTimeout } from "@/common/lib/constants";
 import { Ethers } from "@/common/sdk/web3";
@@ -133,7 +128,7 @@ import { Network } from "@/common/models/network";
 import { useQr } from "@/common/hooks/use-qr";
 
 export default defineComponent({
-  setup(props, ctx) {
+  setup() {
     const {
       store: { state, dispatch, commit }
     } = useVuex();

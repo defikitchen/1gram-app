@@ -14,13 +14,15 @@ export interface MessageProcessingState {
   sendingTime: number;
 }
 
-export const granter =
-  "0:deda155da7c518f57cb664be70b9042ed54a92542769735dfb73d3eef85acdaf";
-
-export const grant = async (client: any, to: string, wait?: boolean) => {
+export const grant = async (
+  client: any,
+  giverAddress: string,
+  to: string,
+  wait?: boolean
+) => {
   const { contracts } = client;
   const runMessage: RunMessage = await contracts.createRunMessage({
-    address: granter,
+    address: giverAddress,
     functionName: "grant",
     abi: marvinAbi,
     input: {

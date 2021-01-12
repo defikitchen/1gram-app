@@ -77,12 +77,6 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { mapState } from "vuex";
-import { WalletState, MasterKey } from "@/common/store/Wallet/Wallet";
-import WalletItem from "@/common/modules/wallet/components/WalletItem.vue";
-import store, { notify, RootState } from "@/common/store";
-import { Network } from "../../../models/network";
 import { Wallet } from "@/common/models/wallet";
 import {
   usePrices,
@@ -93,19 +87,11 @@ import { useVuex } from "@/common/hooks/use-vuex";
 import { useRouter } from "@/common/hooks/use-router";
 import {
   computed,
-  ref,
   watch,
   onMounted,
   defineComponent
 } from "@vue/composition-api";
-import { fromSatoshi } from "@/common/lib/format";
-import { BigNumber } from "bignumber.js";
 import Vue2Filters from "vue2-filters";
-
-interface WalletByKey {
-  key: MasterKey;
-  wallets: Wallet[];
-}
 
 export default defineComponent({
   mixins: [Vue2Filters.mixin],

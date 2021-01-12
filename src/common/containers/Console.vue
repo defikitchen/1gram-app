@@ -103,18 +103,21 @@ import { Component, Vue, Emit, Watch } from "vue-property-decorator";
 import Page from "@/common/components/Page.vue";
 import PageContent from "@/common/components/PageContent.vue";
 import PageFooter from "@/common/components/PageFooter.vue";
-import { listeners } from "cluster";
 import { mapState } from "vuex";
 import { JSONView } from "vue-json-component";
 import { RootState, notify } from "@/common/store";
 import { LogEntry } from "@/common/models/logentry";
 import { themeColors } from "@/vuetify";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref
+} from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
 
-@Component({
+export default defineComponent({
   components: {
-    Page,
-    PageContent,
-    PageFooter,
     "json-view": JSONView
   },
   filters: {
@@ -129,96 +132,104 @@ import { themeColors } from "@/vuetify";
       }
     }
   },
-  computed: {
-    ...mapState<RootState>({
-      logs: state => state.Console.logs,
-      logging: state => state.Console.logging
-    })
-  }
-})
-export default class Console extends Vue {
-  title = "Console Logs";
-  formExpanded = false;
+  setup(props, ctx) {
+    const { store } = useVuex();
+    const logs = computed(() => store.state.Console.logs);
+    const logging = computed(() => store.state.Console.logging);
+    const title = ref("Console Logs");
+    const notificationText = ref<null | HTMLInputElement>(null);
+    const formExpanded = ref(false);
+    const notifyData = ref({
+      text: "Hello World",
+      type: "error" as "error" | "info" | "success" | "warning",
+      duration: 3000,
+      payload: {
+        error: "custom error data"
+      } as any
+    });
 
-  notifyData = {
-    text: "Hello World",
-    type: "error" as "error" | "info" | "success" | "warning",
-    duration: 3000,
-    payload: {
-      error: "custom error data"
-    } as any
-  };
+    const toggleFormExpanded = () => {
+      formExpanded.value = !formExpanded.value;
+    };
 
-  toggleFormExpanded() {
-    this.formExpanded = !this.formExpanded;
-  }
-
-  get payloadModel() {
-    const { payload } = this.notifyData;
-    if (payload === null) return "";
-    return typeof payload === "object"
-      ? JSON.stringify(payload, null, 2)
-      : payload + "";
-  }
-
-  set payloadModel(data: string) {
-    try {
-      this.notifyData.payload = JSON.parse(data);
-    } catch {
-      this.notifyData.payload = data;
-    }
-  }
-
-  clearLogs() {
-    this.$store.commit("Console/clearLogs");
-  }
-
-  mounted() {
-    this.$store.commit("Common/stopLoading");
-  }
-
-  isJSON(obj: any) {
-    if (obj === null || obj === undefined) return false;
-    return obj.constructor === {}.constructor;
-  }
-
-  getStyle(log: LogEntry, text: any[], i: number) {
-    let color = "lightgrey";
-    const customStyle =
-      typeof log.args[0] === "string" &&
-      log.args[0].indexOf("%c") === 0 &&
-      log.args[1];
-    switch (log.type) {
-      case "info":
-        color = themeColors.info;
-        break;
-      case "error":
-        color = themeColors.error;
-        break;
-      case "warn":
-        color = themeColors.warning;
-        break;
-    }
-    if (log.type === "log") {
-      if (customStyle && i === 1) {
-        return "display: none";
+    const payloadModel = computed({
+      get: () => {
+        const { payload } = notifyData.value;
+        if (payload === null) return "";
+        try {
+          return typeof payload === "object"
+            ? JSON.stringify(payload, null, 2)
+            : payload + "";
+        } catch {
+          return "";
+        }
+      },
+      set(data: string) {
+        try {
+          notifyData.value.payload = JSON.parse(data);
+        } catch {
+          notifyData.value.payload = data;
+        }
       }
-      return customStyle;
-    } else {
-      return `color: ${color}; `;
-    }
-  }
+    });
 
-  toggleLogging() {
-    this.$store.dispatch("Console/toggleLogging");
-  }
+    onMounted(() => store.commit.Common.stopLoading());
 
-  async notify() {
-    const input = this.$refs.notificationText as HTMLInputElement;
-    if (!this.notifyData.text) return input.focus();
-    notify(this.notifyData);
+    const isJSON = (obj: any) => {
+      if (obj === null || obj === undefined) return false;
+      return obj.constructor === {}.constructor;
+    };
+
+    const _notify = async () => {
+      const input = notificationText.value;
+      if (!notifyData.value.text) return input?.focus();
+      notify(notifyData.value);
+    };
+
+    const getStyle = (log: LogEntry, text: any[], i: number) => {
+      let color = "lightgrey";
+      const customStyle =
+        typeof log.args[0] === "string" &&
+        log.args[0].indexOf("%c") === 0 &&
+        log.args[1];
+      switch (log.type) {
+        case "info":
+          color = themeColors.info;
+          break;
+        case "error":
+          color = themeColors.error;
+          break;
+        case "warn":
+          color = themeColors.warning;
+          break;
+      }
+      if (log.type === "log") {
+        if (customStyle && i === 1) {
+          return "display: none";
+        }
+        return customStyle;
+      } else {
+        return `color: ${color}; `;
+      }
+    };
+
+    return {
+      title,
+      formExpanded,
+      notifyData,
+      logs,
+      logging,
+      toggleFormExpanded,
+      payloadModel,
+      clearLogs: (store.commit as any).Console.clearLogs,
+      toggleLogging: (store.dispatch as any).Console.toggleLogging,
+      isJSON,
+      notificationText,
+      notify: _notify,
+      getStyle
+    };
   }
-}
+});
 </script>
 
 <style scoped>

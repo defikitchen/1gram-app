@@ -31,7 +31,9 @@ export const defaultNetworks: Network[] = [
     blockExplorerURL: "https://fld.ton.live/",
     graphqlURL: "https://gql.custler.net/graphql",
     protocol: "ton",
-    decimals: 9
+    decimals: 9,
+    giverAddress:
+      "0:deda155da7c518f57cb664be70b9042ed54a92542769735dfb73d3eef85acdaf"
   },
   {
     id: 396,
@@ -48,6 +50,8 @@ export const defaultNetworks: Network[] = [
     blockExplorerURL: "https://net.ton.live/",
     protocol: "ton",
     decimals: 9
+    // giverAddress:
+    //   "0:deda155da7c518f57cb664be70b9042ed54a92542769735dfb73d3eef85acdaf"
   }
   // {
   //   id: 60,

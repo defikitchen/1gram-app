@@ -106,7 +106,6 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "@vue/composition-api";
 import { useVuex } from "@/common/hooks/use-vuex";
-import { Network } from "@/common/models/network";
 import { Contact } from "@/common/models/contact";
 import { useRouter } from "@/common/hooks/use-router";
 import { useCopy } from "@/common/hooks/use-copy";

@@ -74,19 +74,11 @@ import {
   defineComponent,
   PropType,
   toRefs,
-  computed,
-  onMounted,
-  toRef
+  computed
 } from "@vue/composition-api";
 import { token } from "@/common/lib/format";
-import {
-  usePrices,
-  useUsdPrice,
-  useUsdTokenPrice
-} from "@/common/hooks/use-prices";
-import { useEthereum } from "@/common/hooks/use-ethereum";
-import BigNumber from "bignumber.js";
-import { ERC20AccountInfo, ERC20TokenInfo } from "@/common/models/erc20";
+import { usePrices, useUsdPrice } from "@/common/hooks/use-prices";
+import { ERC20TokenInfo } from "@/common/models/erc20";
 import { useCopy } from "@/common/hooks/use-copy";
 
 export default defineComponent({
@@ -122,7 +114,7 @@ export default defineComponent({
     });
 
     const tokens = computed(() => {
-      const { tokenPrices, tokenByAddress } = usePrices();
+      const { tokenByAddress } = usePrices();
       const list = [...(wallet.value?.erc20Tokens || [])];
       const tokens = list
         .map(({ address }) => tokenByAddress(address))

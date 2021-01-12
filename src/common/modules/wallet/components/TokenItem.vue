@@ -138,13 +138,11 @@ import {
   PropType,
   computed,
   toRefs,
-  ref,
-  onMounted
+  ref
 } from "@vue/composition-api";
 import { Wallet } from "@/common/models/wallet";
 import { Tx } from "@/common/models/tx";
-import BigNumber from "bignumber.js";
-import { ERC20AccountInfo, ERC20TokenInfo } from "@/common/models/erc20";
+import { ERC20AccountInfo } from "@/common/models/erc20";
 import { useUsdTokenPrice, usePrices } from "@/common/hooks/use-prices";
 import { useExplorer } from "@/common/hooks/use-explorer";
 import { useCopy } from "@/common/hooks/use-copy";
@@ -152,7 +150,6 @@ import TransactionItem from "./TransactionItem.vue";
 import { useERC20 } from "@/common/hooks/use-erc20";
 import { useVuex } from "@/common/hooks/use-vuex";
 import { useRouter } from "@/common/hooks/use-router";
-import { uniqBy } from "lodash";
 
 export default defineComponent({
   components: { TransactionItem },
@@ -162,7 +159,8 @@ export default defineComponent({
       type: Object as PropType<ERC20AccountInfo>
     },
     wallet: {
-      type: Object as PropType<Wallet>
+      type: Object as PropType<Wallet>,
+      required: true
     }
   },
   setup(props, { emit }) {

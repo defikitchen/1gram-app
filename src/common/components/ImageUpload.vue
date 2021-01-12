@@ -61,7 +61,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from "@vue/composition-api";
-import { Component, Vue, Prop } from "vue-property-decorator";
 import { handleError } from "../lib/error-handling";
 import { getBase64 } from "../lib/get-base64";
 

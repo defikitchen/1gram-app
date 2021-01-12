@@ -435,7 +435,7 @@ const actions = defineActions({
       .catch(() => store.commit.Common.stopLoading())
       .finally(() => {
         console.log(wallet);
-        if (wallet.network.name === "fld.ton.dev") {
+        if (wallet.network.giverAddress) {
           (async () => {
             try {
               commit.setForging(true);
@@ -628,8 +628,8 @@ const actions = defineActions({
     }
     if (wallet.network.protocol !== "ton")
       return handleError({}, "not a TON wallet");
-    if (wallet.network.name === "main.ton.dev") {
-      return handleError({}, "Not available for TON MainNet");
+    if (!wallet.network.giverAddress) {
+      return handleError({}, "Not available for this TON network");
     }
 
     commit.setForging(true);
@@ -644,7 +644,7 @@ const actions = defineActions({
         return commit.setForging(false);
       }
       commit.setForgingString("Granting 100k" + wallet.network.symbol);
-      await grant(client, wallet.address, true);
+      await grant(client, wallet.network.giverAddress, wallet.address, true);
       notify({
         text: "Successfuly received 100k" + wallet.network.symbol
       });

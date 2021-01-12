@@ -10,35 +10,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch } from "vue-property-decorator";
-import Page from "@/common/components/Page.vue";
-import PageContent from "@/common/components/PageContent.vue";
-import PageFooter from "@/common/components/PageFooter.vue";
-import store, { notify } from "@/common/store";
+import { defineComponent, onMounted } from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
+import { notify } from "../store";
 
-@Component({
-  components: {
-    Page,
-    PageContent,
-    PageFooter
-  }
-})
-export default class Template extends Vue {
-  title = "Template";
-
-  mounted() {
-    store.commit.Common.stopLoading();
-  }
-
-  submit() {
-    notify({
-      text: "Submitting works!",
-      type: "success",
-      duration: Infinity,
-      payload: {
-        foo: "bar"
-      }
+export default defineComponent({
+  setup() {
+    const { store } = useVuex();
+    onMounted(() => {
+      store.commit.Common.stopLoading();
     });
+
+    return {
+      submit() {
+        notify({
+          text: "Submitting works!",
+          type: "success",
+          duration: Infinity,
+          payload: {
+            foo: "bar"
+          }
+        });
+      }
+    };
   }
-}
+});
 </script>

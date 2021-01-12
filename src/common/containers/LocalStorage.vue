@@ -30,93 +30,106 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch } from "vue-property-decorator";
-import Page from "@/common/components/Page.vue";
-import PageContent from "@/common/components/PageContent.vue";
-import PageFooter from "@/common/components/PageFooter.vue";
-import store, { notify } from "@/common/store";
+import { notify } from "@/common/store";
 import { handleError } from "../lib/error-handling";
 import { pause } from "../lib/helpers";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  reactive,
+  ref
+} from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
+import { dialog } from "@/main";
+import { useCopy } from "../hooks/use-copy";
 
-@Component({
-  components: {
-    Page,
-    PageContent,
-    PageFooter
-  }
-})
-export default class LocalStorage extends Vue {
-  form = {
-    data: ""
-  };
-
-  async mounted() {
-    await pause(200);
-    (this.$refs.input as any).focus();
-    store.commit.Common.stopLoading();
-  }
-
-  get storage() {
-    const data = JSON.stringify(localStorage, null, 2);
-    return data;
-  }
-
-  set storage(value: string) {
-    try {
-      const obj = JSON.parse(value);
-      if (typeof obj !== "object") return;
-      localStorage.clear();
-      Object.entries(obj).forEach(([key, val]) => {
-        localStorage.setItem(key, val + "");
-      });
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
-  async importStorage() {
-    const yes = await this.$dialog.confirm({
-      title: "Are you sure?",
-      text:
-        "Do you really want to overwrite all app data including wallets and keys?"
+export default defineComponent({
+  setup() {
+    const form = reactive({
+      data: ""
     });
-    if (!yes) return;
-    try {
-      const obj = JSON.parse(this.form.data);
-      if (typeof obj !== "object") return;
-      localStorage.clear();
-      Object.entries(obj).forEach(([key, val]) => {
-        localStorage.setItem(key, val + "");
-      });
+    const { store } = useVuex();
+    const input = ref<null | HTMLInputElement>();
 
-      await notify({
-        text: "Imported " + this.form.data.slice(0, 60) + "...",
-        duration: 1000,
-        payload: localStorage
-      });
-      this.form.data = "";
-      location.reload();
-    } catch (error) {
-      handleError(error, error);
-    }
-  }
-
-  exportStorage() {
-    store.original.dispatch("Common/copy", JSON.stringify(localStorage));
-  }
-
-  async clear() {
-    const yes = await this.$dialog.confirm({
-      title: "Are you sure?",
-      text:
-        "Do you really want to clear all app data including wallets and keys?"
+    onMounted(async () => {
+      await pause(200);
+      input?.value?.focus();
+      store.commit.Common.stopLoading();
     });
-    if (yes) {
-      localStorage.clear();
-      location.reload();
-    }
+
+    const storage = computed({
+      get() {
+        const data = JSON.stringify(localStorage, null, 2);
+        return data;
+      },
+      set(value: string) {
+        try {
+          const obj = JSON.parse(value);
+          if (typeof obj !== "object") return;
+          localStorage.clear();
+          Object.entries(obj).forEach(([key, val]) => {
+            localStorage.setItem(key, val + "");
+          });
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+    });
+
+    const importStorage = async () => {
+      const yes = await dialog.confirm({
+        title: "Are you sure?",
+        text:
+          "Do you really want to overwrite all app data including wallets and keys?"
+      });
+      if (!yes) return;
+      try {
+        const obj = JSON.parse(form.data);
+        if (typeof obj !== "object") return;
+        localStorage.clear();
+        Object.entries(obj).forEach(([key, val]) => {
+          localStorage.setItem(key, val + "");
+        });
+
+        await notify({
+          text: "Imported " + form.data.slice(0, 60) + "...",
+          duration: 1000,
+          payload: localStorage
+        });
+        form.data = "";
+        location.reload();
+      } catch (error) {
+        handleError(error, error);
+      }
+    };
+
+    const exportStorage = () => {
+      useCopy(JSON.stringify(localStorage));
+    };
+
+    const clear = async () => {
+      const yes = await dialog.confirm({
+        title: "Are you sure?",
+        text:
+          "Do you really want to clear all app data including wallets and keys?"
+      });
+      if (yes) {
+        localStorage.clear();
+        location.reload();
+      }
+    };
+
+    return {
+      form,
+      input,
+      storage,
+      clear,
+      exportStorage,
+      importStorage
+    };
   }
-}
+});
 </script>
 
 <style lang="scss">

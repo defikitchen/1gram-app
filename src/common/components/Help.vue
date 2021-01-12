@@ -40,57 +40,43 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Watch } from "vue-property-decorator";
-import store, { notify } from "@/common/store";
+import { computed, defineComponent } from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
 
-@Component({
-  components: {}
-})
-export default class Template extends Vue {
-  title = "Help";
+export default defineComponent({
+  setup() {
+    const { store } = useVuex();
+    const help = computed(() => store.state.Common.Help);
+    const showOverlay = computed(
+      () => store.getters.Common.Help.showHelpOverlay
+    );
+    const last = computed(() => store.getters.Common.Help.lastHelpStep);
 
-  get help() {
-    return store.state.Common.Help;
+    const closeHelp = () => {
+      store.commit.Common.Help.setHelpOpen(false);
+      setTimeout(() => {
+        store.commit.Common.Help.setActiveIndex(0);
+      }, 300);
+    };
+
+    const openHelp = () => {
+      store.commit.Common.Help.setHelpOpen(true);
+    };
+
+    const next = () => {
+      store.dispatch.Common.Help.nextHelpStep();
+    };
+
+    return {
+      help,
+      showOverlay,
+      last,
+      closeHelp,
+      openHelp,
+      next
+    };
   }
-
-  get showOverlay() {
-    return store.getters.Common.Help.showHelpOverlay;
-  }
-
-  get last() {
-    return store.getters.Common.Help.lastHelpStep;
-  }
-
-  closeHelp() {
-    store.commit.Common.Help.setHelpOpen(false);
-    setTimeout(() => {
-      store.commit.Common.Help.setActiveIndex(0);
-    }, 300);
-  }
-
-  openHelp() {
-    store.commit.Common.Help.setHelpOpen(true);
-  }
-
-  next() {
-    store.dispatch.Common.Help.nextHelpStep();
-  }
-
-  mounted() {
-    store.commit.Common.stopLoading();
-  }
-
-  submit() {
-    notify({
-      text: "Submitting works!",
-      type: "success",
-      duration: Infinity,
-      payload: {
-        foo: "bar"
-      }
-    });
-  }
-}
+});
 </script>
 
 <style lang="scss">

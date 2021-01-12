@@ -10,7 +10,7 @@
     <div
       ref="slideButton"
       class="swipe-btn__fab"
-      :style="[slideButtonStyle]"
+      :style="slideButtonStyle"
       @mousedown="startSwipe"
       @mousemove="continueSwipe"
       @mouseup="endSwipe"
@@ -42,7 +42,7 @@
       <div
         ref="overlay"
         class="swipe-btn__background__overlay"
-        :style="[overlayStyle]"
+        :style="overlayStyle"
       />
     </div>
 
@@ -54,182 +54,228 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Emit } from "vue-property-decorator";
 import _get from "lodash/get";
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  ref
+} from "@vue/composition-api";
 
-@Component({
-  components: {}
-})
-export default class SwipeBtn extends Vue {
-  // Fork of https://github.com/tran2/vue-swipe-button/blob/master/src/SwipeButton.vue
-  // With many improvements. Used it for basic swiping code...
-
-  $refs!: {
-    slider: HTMLElement;
-    slideButton: HTMLElement;
-    overlay: HTMLElement;
-    submitButton: HTMLButtonElement;
-  };
-
-  @Prop({ type: String, default: "Swipe to continue" }) initialText!: string;
-  @Prop({ type: String, default: "Success!" }) completedText!: string;
-  @Prop({ type: String, default: "Loading…" }) loadingText!: string;
-  @Prop({ type: String, default: "primary" }) initialColor!: string;
-  @Prop({ type: String, default: "success" }) completedColor!: string;
-  @Prop({ type: String, default: "error" }) errorColor!: string;
-  @Prop({ type: String, default: "Complete all fields" }) errorText!: string;
-  @Prop({ type: String, default: "grey" }) loadingColor!: string;
-  @Prop({ type: String, default: "check" }) initialIcon!: string;
-  @Prop({ type: String, default: "check" }) completedIcon!: string;
-  @Prop({ type: String, default: "warning" }) errorIcon!: string;
-  @Prop({ type: String, default: "3" }) elevation!: string | number;
-  @Prop({ type: Boolean, default: false }) loading!: boolean;
-  @Prop({ type: Boolean, default: false }) error!: boolean;
-
-  private initialMouseX = 0;
-  private currentMouseX = 0;
-  private startDrag = false;
-  private endPoint = 500;
-  private initialSliderWidth = 0;
-  private initialSlideButtonPosition = 0;
-  private instructionText = this.initialText;
-  private slideButtonStyle = { left: "0px" };
-  private overlayStyle = { width: this.getButtonWidth() / 2 + "px" };
-  private sliderClass = "";
-  private completed = false;
-
-  startSwipe(event) {
-    if (this.completed) return;
-    // this will be used to calculate the offset to increase the width
-    // of the slider
-    this.initialMouseX = this.getMouseXPosFromEvent(event);
-    // once our slider's x button position >= slider - button's width,
-    // the action is confirmed
-    this.endPoint = this.getEndingPoint();
-    this.calculateSliderInitialWidth();
-    this.calculateSlideButtonInitialPosition();
-    this.updateSlideButton(0);
-    this.updateSlider(0);
-    this.startDrag = true;
-    // for transition animation
-    this.sliderClass = "has--started";
-  }
-
-  getEndingPoint() {
-    if (!this.$refs.slider) return 0;
-    const clientRects = this.$refs.slider.getClientRects()[0];
-    return clientRects.right;
-  }
-
-  calculateSliderInitialWidth() {
-    if (!this.$refs.slider) return (this.initialSliderWidth = 0);
-    const sliderLeftPos = this.$refs.slider.getClientRects()[0]["x"];
-    this.initialSliderWidth = this.initialMouseX - sliderLeftPos;
-    if (this.initialSliderWidth < 0) {
-      this.initialSliderWidth = 0;
+export default defineComponent({
+  props: {
+    initialText: {
+      default: "Swipe to continue"
+    },
+    completedText: {
+      default: "Success!"
+    },
+    loadingText: {
+      default: "Loading…"
+    },
+    initialColor: {
+      default: "primary"
+    },
+    completedColor: {
+      default: "success"
+    },
+    errorColor: {
+      default: "error"
+    },
+    errorText: {
+      default: "Complete all fields"
+    },
+    loadingColor: {
+      default: "grey"
+    },
+    initialIcon: {
+      default: "check"
+    },
+    completedIcon: {
+      default: "check"
+    },
+    errorIcon: {
+      default: "warning"
+    },
+    elevation: {
+      default: "3"
+    },
+    loading: {
+      default: false
+    },
+    error: {
+      default: false
     }
-  }
+  },
+  setup(props, ctx) {
+    const initialMouseX = ref(0);
+    const currentMouseX = ref(0);
+    const startDrag = ref(false);
+    const endPoint = ref(500);
+    const initialSliderWidth = ref(0);
+    const initialSlideButtonPosition = ref(0);
+    const instructionText = ref(props.initialText);
+    const slideButtonStyle = ref({ left: "0px" });
+    const getButtonWidth = () => {
+      if (!slideButton || !slideButton.value) return 0;
+      const slideButtonRect = slideButton?.value?.getClientRects()[0];
+      return slideButtonRect.width;
+    };
+    const overlayStyle = ref({ width: getButtonWidth() / 2 + "px" });
+    const sliderClass = ref("");
+    const completed = ref(false);
+    const slider = ref<null | HTMLElement>(null);
+    const slideButton = ref<null | HTMLElement>(null);
+    const submitButton = ref<null | HTMLElement>(null);
+    const overlay = ref<null | HTMLElement>(null);
 
-  calculateSlideButtonInitialPosition() {
-    if (!this.$refs.slider) return 0;
-    this.initialSlideButtonPosition = this.$refs.slider.getClientRects()[0][
-      "x"
-    ];
-  }
+    const startSwipe = (event: MouseEvent | TouchEvent) => {
+      if (completed.value) return;
+      // this will be used to calculate the offset to increase the width
+      // of the slider
+      initialMouseX.value = getMouseXPosFromEvent(event);
+      // once our slider's x button position >= slider - button's width,
+      // the action is confirmed
+      endPoint.value = getEndingPoint();
+      calculateSliderInitialWidth();
+      calculateSlideButtonInitialPosition();
+      updateSlideButton(0);
+      updateSlider(0);
+      startDrag.value = true;
+      // for transition animation
+      sliderClass.value = "has--started";
+    };
 
-  continueSwipe(event) {
-    if (!this.startDrag) return;
-    this.currentMouseX = this.getMouseXPosFromEvent(event);
-    const delta = this.currentMouseX - this.initialMouseX;
-    this.updateSlider(delta);
-    this.updateSlideButton(delta);
-    if (this.sliderReachedEndPoint()) this.endSwipe();
-  }
+    const getEndingPoint = () => {
+      if (!slider.value) return 0;
+      const clientRects = slider.value.getClientRects()[0];
+      return clientRects.right;
+    };
 
-  endSwipe() {
-    this.startDrag = false;
-    if (this.sliderReachedEndPoint()) {
-      this.sliderClass = "has--completed";
-      this.actionConfirmed();
-    } else {
-      this.sliderClass = "";
-      this.slideButtonStyle.left = "0px";
-      this.overlayStyle.width = this.getButtonWidth() / 2 + "px";
-    }
-  }
+    const calculateSliderInitialWidth = () => {
+      if (!slider.value) return (initialSliderWidth.value = 0);
+      const sliderLeftPos = slider.value.getClientRects()[0]["x"];
+      initialSliderWidth.value = initialMouseX.value - sliderLeftPos;
+      if (initialSliderWidth.value < 0) {
+        initialSliderWidth.value = 0;
+      }
+    };
 
-  getMouseXPosFromEvent(event) {
-    return event.clientX || _get(event, "touches[0].pageX") || 0;
-  }
+    const calculateSlideButtonInitialPosition = () => {
+      if (!slider.value) return 0;
+      initialSlideButtonPosition.value = slider.value.getClientRects()[0]["x"];
+    };
 
-  updateSlider(delta) {
-    const sliderWidth = this.getSliderWidth();
-    let newWidth = this.initialSliderWidth + delta;
-    // prevent overflow
-    if (newWidth > sliderWidth) newWidth = sliderWidth;
-  }
+    const continueSwipe = (event: MouseEvent | TouchEvent) => {
+      if (!startDrag.value) return;
+      currentMouseX.value = getMouseXPosFromEvent(event);
+      const delta = currentMouseX.value - initialMouseX.value;
+      updateSlider(delta);
+      updateSlideButton(delta);
+      if (sliderReachedEndPoint()) endSwipe();
+    };
 
-  getSliderWidth() {
-    if (!this.$refs.slider) return 0;
-    return this.$refs.slider.getClientRects()[0].width;
-  }
+    const endSwipe = () => {
+      startDrag.value = false;
+      if (sliderReachedEndPoint()) {
+        sliderClass.value = "has--completed";
+        actionConfirmed();
+      } else {
+        sliderClass.value = "";
+        slideButtonStyle.value.left = "0px";
+        overlayStyle.value.width = getButtonWidth() / 2 + "px";
+      }
+    };
 
-  updateSlideButton(delta) {
-    if (delta < 0) return;
-    this.slideButtonStyle.left = `${delta}px`;
-    this.overlayStyle.width = `${delta + this.getButtonWidth() / 2}px`;
-    // prevent overflow
-    if (this.sliderReachedEndPoint()) {
-      const buttonLeftPos = this.getSliderWidth() - this.getButtonWidth();
-      this.slideButtonStyle.left = `${buttonLeftPos}px`;
-      this.overlayStyle.width = `${buttonLeftPos +
-        this.getButtonWidth() / 2}px`;
-    }
-  }
+    const getMouseXPosFromEvent = (event: any) => {
+      return event.clientX || _get(event, "touches[0].pageX") || 0;
+    };
 
-  getButtonWidth() {
-    if (!this.$refs.slideButton) return 0;
-    const slideButtonRect = this.$refs.slideButton.getClientRects()[0];
-    return slideButtonRect.width;
-  }
+    const updateSlider = (delta: number) => {
+      const sliderWidth = getSliderWidth();
+      let newWidth = initialSliderWidth.value + delta;
+      // prevent overflow
+      if (newWidth > sliderWidth) newWidth = sliderWidth;
+    };
 
-  sliderReachedEndPoint() {
-    if (!this.$refs.slideButton) return false;
-    const slideButtonRect = this.$refs.slideButton.getClientRects()[0];
-    return slideButtonRect.right >= this.endPoint;
-  }
+    const getSliderWidth = () => {
+      if (!slider.value) return 0;
+      return slider.value.getClientRects()[0].width;
+    };
 
-  actionConfirmed() {
-    // ensure the event is only fire once
-    if (!this.completed) {
-      this.completed = true;
-      this.instructionText = this.error ? this.errorText : this.completedText;
-      this.$emit("confirm");
-      setTimeout(this.reset, 1000);
-    }
-  }
-  reset() {
-    this.completed = false;
-    this.instructionText = this.initialText;
-    this.sliderClass = "";
-    this.updateSlider(0);
-    this.updateSlideButton(0);
-    this.slideButtonStyle.left = "0px";
-    this.overlayStyle.width = this.getButtonWidth() / 2 + "px";
-  }
-  mounted() {
-    document.addEventListener("mousemove", this.continueSwipe);
-    document.addEventListener("mouseup", this.endSwipe);
-  }
-  destroyed() {
-    document.removeEventListener("mousemove", this.continueSwipe);
-    document.removeEventListener("mouseup", this.endSwipe);
-  }
+    const updateSlideButton = (delta: number) => {
+      if (delta < 0) return;
+      slideButtonStyle.value.left = `${delta}px`;
+      overlayStyle.value.width = `${delta + getButtonWidth() / 2}px`;
+      // prevent overflow
+      if (sliderReachedEndPoint()) {
+        const buttonLeftPos = getSliderWidth() - getButtonWidth();
+        slideButtonStyle.value.left = `${buttonLeftPos}px`;
+        overlayStyle.value.width = `${buttonLeftPos + getButtonWidth() / 2}px`;
+      }
+    };
 
-  submit() {
-    this.$refs.submitButton.click();
+    const sliderReachedEndPoint = () => {
+      if (!slideButton.value) return false;
+      const slideButtonRect = slideButton.value.getClientRects()[0];
+      return slideButtonRect.right >= endPoint.value;
+    };
+
+    const actionConfirmed = () => {
+      // ensure the event is only fire once
+      if (!completed.value) {
+        completed.value = true;
+        instructionText.value = props.error
+          ? props.errorText
+          : props.completedText;
+        ctx.emit("confirm");
+        setTimeout(reset, 1000);
+      }
+    };
+    const reset = () => {
+      completed.value = false;
+      instructionText.value = props.initialText;
+      sliderClass.value = "";
+      updateSlider(0);
+      updateSlideButton(0);
+      slideButtonStyle.value.left = "0px";
+      overlayStyle.value.width = getButtonWidth() / 2 + "px";
+    };
+
+    onMounted(() => {
+      document.addEventListener("mousemove", continueSwipe);
+      document.addEventListener("mouseup", endSwipe);
+      overlayStyle.value = { width: getButtonWidth() / 2 + "px" };
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener("mousemove", continueSwipe);
+      document.removeEventListener("mouseup", endSwipe);
+    });
+
+    const submit = () => {
+      if (!submitButton.value) return;
+      submitButton.value.click();
+    };
+
+    return {
+      submit,
+      slideButtonStyle,
+      startSwipe,
+      continueSwipe,
+      endSwipe,
+      overlayStyle,
+      reset,
+      sliderClass,
+      completed,
+      instructionText,
+      slideButton,
+      slider,
+      submitButton,
+      overlay
+    };
   }
-}
+});
 </script>
 
 <style lang="scss" scoped>

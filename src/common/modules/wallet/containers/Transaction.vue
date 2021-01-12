@@ -460,15 +460,11 @@
 </template>
 
 <script lang="ts">
-import { getMsg } from "@/common/sdk";
-import { Ethers } from "@/common/sdk/web3";
 import BigNumber from "bignumber.js";
 import {
   reactive,
   computed,
-  onBeforeUnmount,
   defineComponent,
-  ref,
   watch
 } from "@vue/composition-api";
 import { useVuex } from "@/common/hooks/use-vuex";
@@ -478,11 +474,8 @@ import { useExplorer } from "@/common/hooks/use-explorer";
 import { WalletState } from "@/common/store/Wallet/Wallet";
 import { PendingTx } from "@/common/models/tx";
 import { Wallet } from "@/common/models/wallet";
-import { Network } from "@/common/models/network";
-import { useEthereum } from "@/common/hooks/use-ethereum";
 import { useERC20 } from "@/common/hooks/use-erc20";
 import { usePrices } from "@/common/hooks/use-prices";
-import { getProvider } from "@/common/sdk/web3/client";
 
 export default defineComponent({
   setup() {

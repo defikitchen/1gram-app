@@ -95,86 +95,85 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import Page from "@/common/components/Page.vue";
-import PageFooter from "@/common/components/PageFooter.vue";
-import PageContent from "@/common/components/PageContent.vue";
-import { mapState } from "vuex";
-import { WalletState } from "@/common/store/Wallet/Wallet";
 import SwipeBtn from "@/common/components/SwipeBtn.vue";
-import { LoadingState } from "@/common/store/Common/Loading";
 import { token } from "@/common/lib/format";
-import {
-  handleTimeout,
-  handleError,
-  addTimeoutToPromise
-} from "@/common/lib/error-handling";
-import { sendTimeout } from "@/common/lib/constants";
-import store, { RootState, notify } from "@/common/store";
-import { PendingTx } from "@/common/models/tx";
+import { handleError } from "@/common/lib/error-handling";
 import { Wallet } from "@/common/models/wallet";
+import {
+  computed,
+  defineComponent,
+  onBeforeMount,
+  onMounted
+} from "@vue/composition-api";
+import { useVuex } from "@/common/hooks/use-vuex";
+import { useRouter } from "@/common/hooks/use-router";
 
-@Component({
+export default defineComponent({
   components: {
     SwipeBtn
   },
-  computed: {
-    ...mapState<RootState>({
-      loading: ({ Common }) => Common.Loading.loading,
-      pendingTransaction: ({ Wallet }) => Wallet.pendingTransaction,
-      sending: ({ Wallet }) => Wallet.sending
-    })
-  }
-})
-export default class Receipt extends Vue {
-  loading!: boolean;
-  pendingTransaction!: PendingTx;
-  sending!: boolean;
-
-  beforeMount() {
-    if (!this.pendingTransaction) this.$router.push("/wallet/send");
-  }
-
-  mounted() {
-    const { commit } = store;
-    commit.Common.stopLoading();
-  }
-
-  get wallet() {
-    return store.getters.Wallet.wallet as Wallet;
-  }
-
-  get swipeText() {
-    const amount = token(
-      !this.pendingTransaction ? 0 : this.pendingTransaction.amount || 0,
-      this.wallet.network.symbol || "",
-      this.wallet.network.decimals || 0
+  setup() {
+    const { store } = useVuex();
+    const router = useRouter();
+    const loading = computed(() => store.state.Common.Loading.loading);
+    const pendingTransaction = computed(
+      () => store.state.Wallet.pendingTransaction
     );
-    return `Swipe to send ${amount}`;
-  }
+    const sending = computed(() => store.state.Wallet.sending);
+    const wallet = computed(() => store.getters.Wallet.wallet as Wallet);
 
-  async submit() {
-    const { dispatch, commit, state } = store;
-    const receiverIsMe = state.Wallet.wallets.find(
-      w => w.address === this.pendingTransaction.to
-    );
+    onBeforeMount(() => {
+      if (!pendingTransaction.value || !wallet.value)
+        router.push("/wallet/send");
+    });
 
-    if (!this.pendingTransaction) return;
-    try {
-      await dispatch.Wallet.send();
-      commit.Wallet.setPendingTx(null);
-      this.$router.push("/wallet");
-      if (receiverIsMe) {
-        setTimeout(
-          () => dispatch.Wallet.updateWallet({ address: receiverIsMe.address }),
-          3000
-        );
+    onMounted(() => {
+      store.commit.Common.stopLoading();
+    });
+
+    const swipeText = computed(() => {
+      const amount = token(
+        !pendingTransaction.value ? 0 : pendingTransaction.value.amount || 0,
+        wallet.value.network.symbol || "",
+        wallet.value.network.decimals || 0
+      );
+      return `Swipe to send ${amount}`;
+    });
+
+    const submit = async () => {
+      const receiverIsMe = store.state.Wallet.wallets.find(
+        w => w.address === pendingTransaction?.value?.to
+      );
+
+      if (!pendingTransaction.value) return;
+      try {
+        await store.dispatch.Wallet.send();
+        store.commit.Wallet.setPendingTx(null);
+        router.push("/wallet");
+        if (receiverIsMe) {
+          setTimeout(
+            () =>
+              store.dispatch.Wallet.updateWallet({
+                address: receiverIsMe.address
+              }),
+            3000
+          );
+        }
+      } catch (error) {
+        handleError(error, `Sending timed out`);
       }
-    } catch (error) {
-      handleError(error, `Sending timed out`);
-    }
+    };
+
+    return {
+      loading,
+      pendingTransaction,
+      sending,
+      wallet,
+      swipeText,
+      submit
+    };
   }
-}
+});
 </script>
 
 <style scoped>

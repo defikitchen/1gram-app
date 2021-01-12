@@ -22,27 +22,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Emit, Watch } from "vue-property-decorator";
-import { mapState } from "vuex";
-import { RootState } from "../store";
-import { LoadingState } from "../store/Common/Loading";
+import { defineComponent, computed } from "@vue/composition-api";
+import { useVuex } from "../hooks/use-vuex";
 
-@Component({
-  computed: {
-    ...mapState<RootState>({
-      status: state => state.Common.Loading.status,
-      loadingOverlay: state => state.Common.Loading.loadingOverlay,
-      loading: state => state.Common.Loading.loading,
-      redirectButton: state => state.Common.Loading.redirectButton
-    })
+export default defineComponent({
+  setup() {
+    const { store } = useVuex();
+    const status = computed(() => store.state.Common.Loading.status);
+    const loadingOverlay = computed(
+      () => store.state.Common.Loading.loadingOverlay
+    );
+    const loading = computed(() => store.state.Common.Loading.loading);
+    const redirectButton = computed(
+      () => store.state.Common.Loading.redirectButton
+    );
+
+    return {
+      status,
+      loadingOverlay,
+      loading,
+      redirectButton
+    };
   }
-})
-export default class loadingOverlay extends Vue {
-  loading!: LoadingState["loading"];
-  redirectButton!: LoadingState["redirectButton"];
-  loadingOverlay!: LoadingState["loadingOverlay"];
-  status!: LoadingState["status"];
-}
+});
 </script>
 
 <style scoped lang="scss">
