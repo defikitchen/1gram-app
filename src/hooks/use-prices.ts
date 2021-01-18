@@ -204,6 +204,7 @@ export const useUsdPrice = (
   const price = new BigNumber(
     prices?.value?.data[networkId]?.quote.USD.price || 0
   );
+  console.log(price.toString());
   const total = val
     .times(price)
     .div(10 ** (decimals || 0))

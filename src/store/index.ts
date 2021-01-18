@@ -2,7 +2,6 @@ import { NotificationOptions } from "@/models/notification";
 import { createDirectStore } from "direct-vuex";
 import Vue from "vue";
 import Vuex from "vuex";
-import Common, { CommonState } from "./Common";
 import { NotifyResult } from "./Notifications";
 
 Vue.use(Vuex);
@@ -75,10 +74,6 @@ declare module "vuex" {
   interface Store<S> {
     direct: RootStore;
   }
-}
-
-export interface RootState {
-  Common: CommonState;
 }
 
 export const notify = (options: NotificationOptions): NotifyResult => {
