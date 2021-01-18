@@ -279,12 +279,13 @@ import { useRouter } from "@/hooks/use-router";
 import { KeyPair } from "@/sdk";
 import { useCopy } from "@/hooks/use-copy";
 import NetworkList from "@/components/NetworkList.vue";
+import { Wallet } from "@/models/wallet";
 
 export default defineComponent({
   components: { NetworkList },
   setup(_, { root }) {
     const { store } = useVuex();
-    const wallet = computed(() => store.getters.Wallet.wallet);
+    const wallet = computed(() => store.getters.Wallet.wallet as Wallet);
     const router = useRouter();
     const expert = computed(() => store.state.Settings.mode === "expert");
     const { addressUrl } = useExplorer();

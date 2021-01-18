@@ -58,12 +58,13 @@ import { useVuex } from "@/hooks/use-vuex";
 import { useCopy } from "@/hooks/use-copy";
 import { useRouter } from "@/hooks/use-router";
 import { useFilters } from "@/lib/format";
+import { Wallet } from "@/models/wallet";
 
 export default defineComponent({
   setup() {
     const { store } = useVuex();
     const loading = computed(() => store.state.Loading.loading);
-    const wallet = computed(() => store.getters.Wallet.wallet);
+    const wallet = computed(() => store.getters.Wallet.wallet as Wallet);
     const copy = useCopy;
     const qr = ref("");
     const router = useRouter();

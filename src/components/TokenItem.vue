@@ -2,7 +2,8 @@
   <div>
     <v-list-item @click="dialog = true">
       <v-list-item-avatar size="25">
-        <identicon :src="token.logo" :seed="token.address" />
+        <identicon v-if="'logo' in token" :src="token.logo" />
+        <identicon e-else :seed="token.address" />
       </v-list-item-avatar>
       <v-list-item-content>
         <v-list-item-title name="wallet-item-name" class="wallet-item__name">

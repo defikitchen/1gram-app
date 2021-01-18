@@ -8,7 +8,9 @@
               <v-list-item-subtitle v-text="'Amount'" />
               <v-list-item-title class="mt-1">{{
                 token(
-                  pendingTransaction.amount,
+                  pendingTransaction && pendingTransaction.amount
+                    ? pendingTransaction.amount
+                    : 0,
                   wallet.network.symbol,
                   wallet.network.decimals
                 )

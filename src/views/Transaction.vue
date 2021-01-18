@@ -472,7 +472,7 @@ import { useCopy } from "@/hooks/use-copy";
 import { useRouter } from "@/hooks/use-router";
 import { useExplorer } from "@/hooks/use-explorer";
 import { WalletState } from "@/store/Wallet";
-import { PendingTx } from "@/models/tx";
+import { PendingTx, Tx } from "@/models/tx";
 import { Wallet } from "@/models/wallet";
 import { useERC20 } from "@/hooks/use-erc20";
 import { usePrices } from "@/hooks/use-prices";
@@ -495,7 +495,7 @@ export default defineComponent({
     const { tokenPrices } = usePrices();
     const Wallet = state.Wallet as WalletState;
     const wallet = computed(() => getters.Wallet.wallet as Wallet);
-    const tx = computed(() => Wallet.transaction);
+    const tx = computed(() => Wallet.transaction as Tx);
     const msg = computed(() => {
       if (!tx.value) return null;
       return wallet.value.messages.find(m => m.id === tx.value?.inMsg);
