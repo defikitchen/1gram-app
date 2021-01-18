@@ -33,7 +33,7 @@ export const vuetifyOptions = {
       process.env.NODE_ENV === "production"
         ? css.replace(/[\s|\r\n|\r|\n]/g, "")
         : css,
-    dark: getCache<"dark" | "light">("theme", "light") === "dark",
+    dark: getCache<"dark" | "light">("theme", "dark") === "dark",
     // https://vuetifyjs.com/en/customization/theme
     themes: {
       light: {
