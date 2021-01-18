@@ -1,19 +1,16 @@
-import { handleError } from "./common/lib/error-handling";
+import { handleError } from "./lib/error-handling";
 import Vue from "vue";
 import VueRouter from "vue-router";
-import store, { notify } from "@/common/store";
-import { routes } from "./common/routes";
+import store, { notify } from "@/store";
+import { routes } from "./routes";
 
 const Console = () =>
-  import(/* webpackChunkName: "Console" */ "@/common/containers/Console.vue");
-const Bip44 = () =>
-  import(/* webpackChunkName: "Bip44" */ "@/common/containers/Bip44.vue");
+  import(/* webpackChunkName: "Console" */ "@/views/Console.vue");
+const Bip44 = () => import(/* webpackChunkName: "Bip44" */ "@/views/Bip44.vue");
 const Settings = () =>
-  import(/* webpackChunkName: "Settings" */ "@/common/containers/Settings.vue");
+  import(/* webpackChunkName: "Settings" */ "@/views/WalletSettings.vue");
 const localStorage = () =>
-  import(
-    /* webpackChunkName: "LocalStorage" */ "@/common/containers/LocalStorage.vue"
-  );
+  import(/* webpackChunkName: "LocalStorage" */ "@/views/LocalStorage.vue");
 
 Vue.use(VueRouter);
 
@@ -78,10 +75,10 @@ router.beforeEach(async (to, from, next) => {
   const { state } = store;
 
   const now = new Date().getTime();
-  const expiresAt = state.Common.Login.seshExpiresAt;
-  const { pinCreated, disclaimerConsent } = state.Common.Login;
+  const expiresAt = state.Login.seshExpiresAt;
+  const { pinCreated, disclaimerConsent } = state.Login;
   const validSesh = pinCreated && expiresAt && expiresAt >= now;
-  const expertMode = state.Common.Settings.mode === "expert";
+  const expertMode = state.Settings.mode === "expert";
   const isWelcome = to.name === "welcome";
 
   if (!disclaimerConsent && !isWelcome) {
@@ -92,14 +89,14 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (!validSesh && !expertMode && !isWelcome) {
-    await store.dispatch.Common.Login.promptPin({
+    await store.dispatch.Login.promptPin({
       persistent: true
     });
   }
 
   if (state.Wallet.forging || state.Wallet.sending || from.meta.cantGoBack) {
     // todo: maybe turn back on
-    // if (to.name !== "Login" && !state.Common.Login.auth) {
+    // if (to.name !== "Login" && !state.Login.auth) {
     //   next("/login-pin");
     // }
 
@@ -112,7 +109,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.stopLoading) {
-    store.commit.Common.stopLoading();
+    store.commit.Loading.stopLoading();
   }
 
   if (

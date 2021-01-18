@@ -14,7 +14,8 @@
     "baseUrl": ".",
     "resolveJsonModule": true,
     "noImplicitAny": false,
-    "types": ["webpack-env", "mocha", "chai"],
+    "typeRoots": ["./node_modules/@types", "./node_modules/vuetify/types"],
+    "types": ["webpack-env", "mocha", "chai", "vuetify"],
     "paths": {
       "@/*": ["src/*"]
     },
@@ -25,8 +26,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "tests/unit/format.spec.js"
+    "tests/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }

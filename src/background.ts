@@ -1,7 +1,6 @@
 "use strict";
 
 import { app, protocol, BrowserWindow } from "electron";
-import spawn from "cross-spawn";
 import {
   createProtocol,
   installVueDevtools

@@ -4,7 +4,7 @@
     :data-show-toolbar="meta.showToolbar ? 'true' : 'false'"
     :data-loading="loading ? 'true' : 'false'"
     :data-help-mode="help.open ? 'true' : 'false'"
-    :data-help-step="activeHelpStep.id"
+    :data-help-step="activeHelpStep.name"
     :data-help-overlay="activeHelpStep.overlay ? 'true' : 'false'"
   >
     <v-app>
@@ -40,18 +40,18 @@ import {
   onBeforeUnmount,
   onBeforeMount
 } from "@vue/composition-api";
-import NavBar from "@/common/components/NavBar.vue";
-import LoadingOverlay from "@/common/components/LoadingOverlay.vue";
-import Help from "@/common/components/Help.vue";
-import NotificationOverlay from "@/common/components/NotificationOverlay.vue";
-import Modals from "@/common/components/Modals.vue";
-import { useVuex } from "@/common/hooks/use-vuex";
-import { useMeta, useRouter } from "@/common/hooks/use-router";
-import { handleError } from "@/common/lib/error-handling";
-import { notify } from "@/common/store";
-import { Notification } from "@/common/models/notification";
-import { NotifyResult } from "@/common/store/Common/Notifications.ts";
-import { usePrices } from "@/common/hooks/use-prices";
+import NavBar from "@/components/NavBar.vue";
+import LoadingOverlay from "@/components/LoadingOverlay.vue";
+import Help from "@/components/Help.vue";
+import NotificationOverlay from "@/components/NotificationOverlay.vue";
+import Modals from "@/components/Modals.vue";
+import { useVuex } from "@/hooks/use-vuex";
+import { useMeta, useRouter } from "@/hooks/use-router";
+import { handleError } from "@/lib/error-handling";
+import { notify } from "@/store";
+import { Notification } from "@/models/notification";
+import { NotifyResult } from "@/store/Notifications";
+import { usePrices } from "@/hooks/use-prices";
 
 export default defineComponent({
   components: {
@@ -63,25 +63,25 @@ export default defineComponent({
   },
   setup(_, ctx) {
     const {
-      store: { state, getters, commit, original, dispatch }
+      store: { state, getters, commit, dispatch }
     } = useVuex();
     const router = useRouter();
-    const loading = computed(() => state.Common.Loading.loading);
-    const help = computed(() => state.Common.Help);
-    const activeHelpStep = computed(() => getters.Common.Help.activeHelpStep);
+    const loading = computed(() => state.Loading.loading);
+    const help = computed(() => state.Help);
+    const activeHelpStep = computed(() => getters.Help.activeHelpStep);
     const meta = useMeta(ctx);
     const notification = ref<Notification | null>(null);
     const { initBasePrices, updatePrices } = usePrices();
     let appTimer: any;
 
     const timer = async () => {
-      const oldVal = state.Common.Loading.online;
+      const oldVal = state.Loading.online;
       const { onLine } = navigator;
 
       if (oldVal !== onLine) {
         notification.value?.dismiss();
-        commit.Common.setOnline(onLine);
-        const result: NotifyResult = !onLine
+        commit.Loading.setOnline(onLine);
+        const result = !onLine
           ? await handleError(
               { onLine },
               "You're offline. Make sure you're connected to the internet and try again.",
@@ -104,10 +104,10 @@ export default defineComponent({
       dispatch.Wallet.updateWallets(false);
       appTimer = setInterval(timer, 1000);
       timer();
-      dispatch.Common.Notifications.dismissAll();
-      dispatch.Common.Settings.initTheme();
+      dispatch.Notifications.dismissAll();
+      dispatch.Settings.initTheme();
       updatePrices().then(() => dispatch.Wallet.updateWallets(false));
-      if (state.Console.logging) original.commit("Console/enableLogging");
+      if (state.Console.logging) dispatch.Console.enableLogging();
     });
 
     onBeforeUnmount(() => clearInterval(appTimer));

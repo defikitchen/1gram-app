@@ -1,6 +1,6 @@
 {
   "name": "1gram",
-  "version": "0.10.3",
+  "version": "0.11.0",
   "description": "FreeTON Wallet",
   "scripts": {
     "build": "npm run browser:build",
@@ -36,6 +36,7 @@
     "blockies-identicon": "^0.1.0",
     "chai": "^4.2.0",
     "color-convert": "^2.0.1",
+    "copy-to-clipboard": "^3.3.1",
     "cordova-promise-fs": "^1.2.5",
     "core-js": "^3.6.4",
     "dayjs": "^1.9.6",

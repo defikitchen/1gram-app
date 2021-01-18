@@ -1,84 +1,41 @@
 import "reflect-metadata";
-
-import "./common/styles/app.scss";
+import Vue from "vue";
+import "@/styles/app.scss";
 import VuetifyDialog from "vuetify-dialog";
 import "vuetify-dialog/dist/vuetify-dialog.css";
 import Vuetify from "vuetify";
-import { vuetifyOptions } from "./vuetify";
+import { vuetifyOptions } from "@/vuetify";
 import Vue2Filters from "vue2-filters";
-import { Component, Vue } from "vue-property-decorator";
-import VueCompositionAPI, { provide } from "@vue/composition-api";
-import TransactionItem from "@/common/modules/wallet/components/TransactionItem.vue";
-import BackupWarning from "@/common/modules/wallet/components/BackupWarning.vue";
-import Page from "@/common/components/Page.vue";
-import PageFooter from "@/common/components/PageFooter.vue";
-import PageSubtitle from "@/common/components/PageSubtitle.vue";
-import PageContent from "@/common/components/PageContent.vue";
-import PageHeader from "@/common/components/PageHeader.vue";
-import Notification from "@/common/components/Notification.vue";
-import Identicon from "@/common/modules/wallet/components/Identicon.vue";
-import WalletItem from "@/common/modules/wallet/components/WalletItem.vue";
-import TokenItem from "@/common/modules/wallet/components/TokenItem.vue";
-import ImageUpload from "@/common/components/ImageUpload.vue";
-import BaseDialog from "@/common/components/BaseDialog.vue";
-import NetworkList from "@/common/modules/wallet/components/NetworkList.vue";
-import App from "./App.vue";
-import store from "./common/store";
-import router from "./router";
 import PortalVue from "portal-vue";
-import { Help } from "./common/directives/help";
-import {
-  time,
-  shortify,
-  token,
-  fromNow,
-  fromSatoshi,
-  toSatoshi
-} from "@/common/lib/format";
+import VueCompositionAPI, { provide, createApp } from "@vue/composition-api";
 import VueQrcodeReader from "vue-qrcode-reader";
-import { usePrices } from "./common/hooks/use-prices";
-
-window.Vue = Vue as any;
+import TransactionItem from "@/components/TransactionItem.vue";
+import BackupWarning from "@/components/BackupWarning.vue";
+import Page from "@/components/Page.vue";
+import PageFooter from "@/components/PageFooter.vue";
+import PageSubtitle from "@/components/PageSubtitle.vue";
+import PageContent from "@/components/PageContent.vue";
+import PageHeader from "@/components/PageHeader.vue";
+import Notification from "@/components/Notification.vue";
+import Identicon from "@/components/Identicon.vue";
+import WalletItem from "@/components/WalletItem.vue";
+import TokenItem from "@/components/TokenItem.vue";
+import ImageUpload from "@/components/ImageUpload.vue";
+import BaseDialog from "@/components/BaseDialog.vue";
+import NetworkList from "@/components/NetworkList.vue";
+import App from "@/App.vue";
+import store from "@/store";
+import router from "@/router";
+import { Help } from "@/directives/help";
+import * as filters from "@/lib/format";
+import { usePrices } from "@/hooks/use-prices";
 
 export const vuetify = new Vuetify(vuetifyOptions);
 
 Vue.use(VueCompositionAPI);
-Vue.use(VuetifyDialog, {
-  context: {
-    vuetify
-  }
-});
-
-Vue.use(Vue2Filters);
-Vue.use(PortalVue);
 Vue.use(Vuetify);
-Vue.use(VueQrcodeReader);
 
-Vue.directive("help", Help);
-
-Vue.filter("token", token);
-Vue.filter("time", time);
-Vue.filter("fromNow", fromNow);
-Vue.filter("shortify", shortify);
-Vue.filter("fromSatoshi", fromSatoshi);
-Vue.filter("toSatoshi", toSatoshi);
-
-Vue.component("TransactionItem", TransactionItem);
-Vue.component("Page", Page);
-Vue.component("PageFooter", PageFooter);
-Vue.component("PageHeader", PageHeader);
-Vue.component("PageContent", PageContent);
-Vue.component("PageSubtitle", PageSubtitle);
-Vue.component("BackupWarning", BackupWarning);
-Vue.component("Identicon", Identicon);
-Vue.component("WalletItem", WalletItem);
-Vue.component("Notification", Notification);
-Vue.component("ImageUpload", ImageUpload);
-Vue.component("TokenItem", TokenItem);
-Vue.component("BaseDialog", BaseDialog);
-Vue.component("NetworkList", NetworkList);
-
-@Component({
+const app = createApp({
   store: store.original,
   router,
   vuetify,
@@ -86,14 +43,58 @@ Vue.component("NetworkList", NetworkList);
     provide("vuex-store", store);
     const { prices } = usePrices();
     return {
-      prices
+      prices,
+      ...filters.useFilters()
     };
   },
   render: h => h(App)
-})
-export default class RootComponent extends Vue {}
+});
 
-const el = new RootComponent().$mount().$el;
+app.use(VuetifyDialog, {
+  context: {
+    vuetify
+  }
+});
 
-export const dialog = Vue.prototype.$dialog as Vue["$dialog"];
-(document.getElementById("app") as HTMLElement).appendChild(el);
+app.use(Vue2Filters);
+app.use(PortalVue);
+app.use(VueQrcodeReader);
+
+app.directive("help", Help);
+
+/**
+ * @deprecated
+ * @todo: migrate to functions
+ */
+// Vue.filter("token", filters.token);
+// Vue.filter("time", filters.time);
+// Vue.filter("fromNow", filters.fromNow);
+// Vue.filter("shortify", filters.shortify);
+// Vue.filter("fromSatoshi", filters.fromSatoshi);
+// Vue.filter("toSatoshi", filters.toSatoshi);
+
+app.component("TransactionItem", TransactionItem);
+app.component("Page", Page);
+app.component("PageFooter", PageFooter);
+app.component("PageHeader", PageHeader);
+app.component("PageContent", PageContent);
+app.component("PageSubtitle", PageSubtitle);
+app.component("BackupWarning", BackupWarning);
+app.component("Identicon", Identicon);
+app.component("WalletItem", WalletItem);
+app.component("Notification", Notification);
+app.component("ImageUpload", ImageUpload);
+app.component("TokenItem", TokenItem);
+app.component("BaseDialog", BaseDialog);
+app.component("NetworkList", NetworkList);
+
+export default app;
+
+app.mount("#app");
+
+const rootEl = document.getElementById("app") as HTMLElement;
+const appInstance = rootEl["__vue__"] as Vue;
+window["APP"] = appInstance;
+
+export const dialog = appInstance.$dialog;
+export const useDialog = () => dialog;
