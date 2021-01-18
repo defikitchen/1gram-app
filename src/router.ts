@@ -1,19 +1,16 @@
-import { handleError } from "./common/lib/error-handling";
+import { handleError } from "./lib/error-handling";
 import Vue from "vue";
 import VueRouter from "vue-router";
-import store, { notify } from "@/common/store";
-import { routes } from "./common/routes";
+import store, { notify } from "@/store";
+import { routes } from "./routes";
 
 const Console = () =>
-  import(/* webpackChunkName: "Console" */ "@/common/containers/Console.vue");
-const Bip44 = () =>
-  import(/* webpackChunkName: "Bip44" */ "@/common/containers/Bip44.vue");
+  import(/* webpackChunkName: "Console" */ "@/views/Console.vue");
+const Bip44 = () => import(/* webpackChunkName: "Bip44" */ "@/views/Bip44.vue");
 const Settings = () =>
-  import(/* webpackChunkName: "Settings" */ "@/common/containers/Settings.vue");
+  import(/* webpackChunkName: "Settings" */ "@/views/WalletSettings.vue");
 const localStorage = () =>
-  import(
-    /* webpackChunkName: "LocalStorage" */ "@/common/containers/LocalStorage.vue"
-  );
+  import(/* webpackChunkName: "LocalStorage" */ "@/views/LocalStorage.vue");
 
 Vue.use(VueRouter);
 
@@ -97,7 +94,11 @@ router.beforeEach(async (to, from, next) => {
     });
   }
 
-  if (state.Wallet.forging || state.Wallet.sending || from.meta.cantGoBack) {
+  if (
+    state.Common.Wallet.forging ||
+    state.Common.Wallet.sending ||
+    from.meta.cantGoBack
+  ) {
     // todo: maybe turn back on
     // if (to.name !== "Login" && !state.Common.Login.auth) {
     //   next("/login-pin");
@@ -112,7 +113,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.stopLoading) {
-    store.commit.Common.stopLoading();
+    store.commit.Common.Loading.stopLoading();
   }
 
   if (

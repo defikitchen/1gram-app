@@ -1,6 +1,6 @@
-import { getClient } from "../common/sdk/ton-js-client";
-import { calcWallet } from "../common/sdk/ton-js-client/calcWallet";
-import { getPrices } from "../common/sdk/ton-node-api";
+import { getClient } from "@/sdk/ton-js-client";
+import { calcWallet } from "@/sdk/ton-js-client/calcWallet";
+import { getPrices } from "@/sdk/ton-node-api";
 import { expect } from "chai";
 import { before } from "mocha";
 

@@ -26,7 +26,9 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "tests/unit/format.spec.js"
+    "tests/unit/format.spec.js",
+    "src/components/TokenItem.vue",
+    "src/components/BackupWarning.vue"
   ],
   "exclude": ["node_modules"]
 }
