@@ -29,15 +29,6 @@
       <currency-list @select="closeModals" :open="modals.currency.value" />
     </BaseDialog>
 
-    <BaseDialog
-      v-model="modals.contacts.value"
-      title="Contact Book"
-      :width="600"
-      name="modal-contacts"
-    >
-      <contact-book />
-    </BaseDialog>
-
     <v-bottom-sheet
       max-width="600"
       v-model="modals.networkList.value"
@@ -111,7 +102,6 @@ import AddContact from "@/views/AddContact.vue";
 import AddNetwork from "@/views/AddNetwork.vue";
 import NetworkList from "@/components/NetworkList.vue";
 import WalletMenu from "@/components/WalletMenu.vue";
-import ContactBook from "@/components/ContactBook.vue";
 import CurrencyList from "@/components/CurrencyList.vue";
 import { useRouter, useRoute } from "@/hooks/use-router";
 import { useVuex } from "@/hooks/use-vuex";
@@ -125,7 +115,6 @@ export default defineComponent({
     AddContact,
     AddNetwork,
     WalletMenu,
-    ContactBook,
     CurrencyList,
     NetworkList
   },

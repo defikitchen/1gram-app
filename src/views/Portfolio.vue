@@ -51,14 +51,30 @@
         </div>
       </div>
 
-      <WalletItem
-        v-for="(wallet, i) of orderBy(wallets, 'name')"
-        :wallet="wallet"
-        :key="'wal-' + i"
-        :inset="true"
-        :divider="i !== 0"
-        @open="open"
-      />
+      <template v-for="(_wallets, name, index) in groupedWallets" v-else>
+        <v-subheader class="px-0" :key="'h-' + index"
+          >{{ networkByName(name).name }}<v-spacer /><span
+            class="text-m"
+            v-if="networkByName(name).etherscanId"
+            >1 {{ networkByName(name).symbol }}
+            ≈
+            {{
+              token(asBaseCurrency(networkRate(name)), baseCurrency.code, 0, 2)
+            }}</span
+          ></v-subheader
+        >
+
+        <v-card class="mb-4" :key="index">
+          <WalletItem
+            v-for="(wallet, i) of orderBy(_wallets, 'name')"
+            :wallet="wallet"
+            :key="'wal-' + i"
+            :inset="false"
+            :divider="i !== 0"
+            @open="open"
+          />
+        </v-card>
+      </template>
 
       <v-subheader class="px-0 mt-4" v-if="wallets.length > 0">
         <v-spacer />
@@ -89,6 +105,7 @@ import {
 } from "@vue/composition-api";
 import Vue2Filters from "vue2-filters";
 import { useFilters } from "@/lib/format";
+import { Network } from "@/models/network";
 
 export default defineComponent({
   mixins: [Vue2Filters.mixin],
@@ -98,7 +115,8 @@ export default defineComponent({
       tokenPrices,
       baseCurrency,
       updatePrices,
-      lastFetched
+      lastFetched,
+      asBaseCurrency
     } = usePrices();
     const { store } = useVuex();
     const router = useRouter();
@@ -113,7 +131,25 @@ export default defineComponent({
     const wallets = computed(() => store.state.Wallet?.wallets || []);
     const wallet = computed(() => store.getters.Wallet.wallet);
     const network = computed(() => store.state.Wallet.network);
+    const networks = computed(() => store.state.Wallet.networks);
     const settings = computed(() => store.state.Settings);
+
+    interface GroupedWallet {
+      [name: string]: Wallet[];
+    }
+
+    const networkByName = (name: string) =>
+      networks.value.find(n => n.name === name) as Network;
+
+    const groupedWallets = computed(() =>
+      wallets.value.reduce((grouped, wallet) => {
+        const networkName = wallet.network.name || "";
+        if (!networkName) return grouped;
+        grouped[networkName] = grouped[networkName] || [];
+        grouped[networkName].push(wallet);
+        return grouped;
+      }, {} as GroupedWallet)
+    );
 
     const update = (force?: boolean) => {
       updatePrices(force).then(() =>
@@ -130,8 +166,16 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      update();
+      update(true);
     });
+
+    const networkRate = (name: string) => {
+      const usdRate = baseCurrency.value?.usdRate || 1;
+      const network = networkByName(name);
+      const tokenPrice =
+        +useUsdPrice(network.etherscanId || -1, 1, 0, prices) * usdRate;
+      return tokenPrice;
+    };
 
     const balance = computed(() => {
       const usdRate = baseCurrency.value?.usdRate || 1;
@@ -174,6 +218,10 @@ export default defineComponent({
       baseCurrency,
       lastFetched,
       settings,
+      groupedWallets,
+      networkByName,
+      asBaseCurrency,
+      networkRate,
       ...useFilters()
     };
   }
