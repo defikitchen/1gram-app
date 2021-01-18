@@ -1,3 +1,5 @@
+import { getCache } from "./lib/cache";
+
 // import Vue from "vue";
 export const primary = "#9CF6F6"; // 00b4e8
 export const secondary = "#F4FF52";
@@ -31,7 +33,7 @@ export const vuetifyOptions = {
       process.env.NODE_ENV === "production"
         ? css.replace(/[\s|\r\n|\r|\n]/g, "")
         : css,
-    dark: JSON.parse(localStorage.getItem("darkMode") || "true"),
+    dark: getCache<"dark" | "light">("theme", "light") === "dark",
     // https://vuetifyjs.com/en/customization/theme
     themes: {
       light: {
