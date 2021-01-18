@@ -33,6 +33,7 @@ import { usePrices } from "@/hooks/use-prices";
 export const vuetify = new Vuetify(vuetifyOptions);
 
 Vue.use(VueCompositionAPI);
+Vue.use(Vuetify);
 
 const app = createApp({
   store: store.original,
@@ -57,7 +58,6 @@ app.use(VuetifyDialog, {
 
 app.use(Vue2Filters);
 app.use(PortalVue);
-app.use(Vuetify);
 app.use(VueQrcodeReader);
 
 app.directive("help", Help);
