@@ -57,7 +57,7 @@ export const walletRoutes: RouteWithProps[] = [
       hideBack: true,
       stopLoading: true
     },
-    beforeEnter(to, from, next) {
+    beforeEnter(to, _, next) {
       to.meta.flat = store.state.Wallet.wallets.length > 0;
       next();
     }
@@ -83,11 +83,9 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, _, next) {
-      const wallet = store.getters.Wallet?.wallet;
-      const address = wallet?.address;
-      if (address) {
-        to.meta.title = wallet?.name as string;
-        to.meta.toolbarType = wallet?.color || "primary";
+      const { color, address } = store.getters.Wallet?.wallet || {};
+      if (color) {
+        to.meta.toolbarType = color || "primary";
       }
       next(address ? undefined : "/portfolio");
     }
@@ -149,7 +147,7 @@ export const walletRoutes: RouteWithProps[] = [
     },
     beforeEnter(to, _, next) {
       const { wallet } = store.getters.Wallet;
-      if (!wallet) next("/portfolio");
+      if (!wallet) return next("/portfolio");
       else {
         to.meta.toolbarType = wallet.color || "primary";
         next();
@@ -167,12 +165,9 @@ export const walletRoutes: RouteWithProps[] = [
       backIcon: "close",
       stopLoading: true
     },
-    beforeEnter(to, _, next) {
+    beforeEnter(_, __, next) {
       const { wallet } = store.getters.Wallet;
-      if (wallet) {
-        to.meta.title = "Receive to " + shortify(wallet.address);
-      }
-      next();
+      next(wallet?.address ? undefined : "/portfolio");
     }
   },
   {
@@ -216,9 +211,6 @@ export const walletRoutes: RouteWithProps[] = [
       backIcon: "close",
       backRoute: "/portfolio",
       stopLoading: true
-    },
-    beforeEnter(_, __, next) {
-      next();
     }
   },
   {
@@ -236,7 +228,6 @@ export const walletRoutes: RouteWithProps[] = [
     beforeEnter(to, _, next) {
       const { wallet } = store.getters.Wallet;
       if (!wallet?.mnemonic) return next("/portfolio");
-      to.meta.title = `Back up ${wallet.name}`;
       to.meta.toolbarType = wallet.color || "primary";
       next();
     }
