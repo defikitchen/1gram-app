@@ -66,23 +66,21 @@ export default defineComponent({
     } = useVuex();
 
     const drawerOpen = computed({
-      get: () => state.Common.NavBar.drawerOpen,
-      set: (value: boolean) => commit.Common.NavBar.setDrawer({ value })
+      get: () => state.NavBar.drawerOpen,
+      set: (value: boolean) => commit.NavBar.setDrawer({ value })
     });
 
     const notificationsActive = computed(
-      () => getters.Common.Notifications.notificationsActive
+      () => getters.Notifications.notificationsActive
     );
     const notificationsHistory = computed(
-      () => getters.Common.Notifications.notificationsHistory
+      () => getters.Notifications.notificationsHistory
     );
 
-    const notifications = computed(
-      () => state.Common.Notifications.notifications
-    );
-    const dismiss = commit.Common.Notifications.dismiss;
-    const dismissAll = dispatch.Common.Notifications.dismissAll;
-    const removeAll = dispatch.Common.Notifications.removeAll;
+    const notifications = computed(() => state.Notifications.notifications);
+    const dismiss = commit.Notifications.dismiss;
+    const dismissAll = dispatch.Notifications.dismissAll;
+    const removeAll = dispatch.Notifications.removeAll;
 
     return {
       drawerOpen,

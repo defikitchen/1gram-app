@@ -91,7 +91,7 @@
       </v-card>
     </PageContent>
     <PageFooter :padding="true">
-      <v-btn @click="notify(notifyData)" large block :color="notifyData.type">
+      <v-btn @click="notify" large block :color="notifyData.type">
         Notify <v-icon right>notifications</v-icon>
       </v-btn>
     </PageFooter>
@@ -99,7 +99,7 @@
 </template>
 
 <script lang="ts">
-import { JSONView } from "vue-json-component";
+import { JSONView as JsonView } from "vue-json-component";
 import { notify } from "@/store";
 import { LogEntry } from "@/models/logentry";
 import { themeColors } from "@/vuetify";
@@ -113,7 +113,7 @@ import { useVuex } from "@/hooks/use-vuex";
 
 export default defineComponent({
   components: {
-    ["json-view"]: JSONView
+    JsonView: JsonView as any
   },
   filters: {
     reverse(arr: any[]) {
@@ -129,8 +129,8 @@ export default defineComponent({
   },
   setup(props, ctx) {
     const { store } = useVuex();
-    const logs = computed(() => store.state.Common.Console.logs);
-    const logging = computed(() => store.state.Common.Console.logging);
+    const logs = computed(() => store.state.Console.logs);
+    const logging = computed(() => store.state.Console.logging);
     const title = ref("Console Logs");
     const notificationText = ref<null | HTMLInputElement>(null);
     const formExpanded = ref(false);
@@ -168,7 +168,7 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => store.commit.Common.Loading.stopLoading());
+    onMounted(() => store.commit.Loading.stopLoading());
 
     const isJSON = (obj: any) => {
       if (obj === null || obj === undefined) return false;
@@ -216,8 +216,8 @@ export default defineComponent({
       logging,
       toggleFormExpanded,
       payloadModel,
-      clearLogs: store.commit.Common.Console.clearLogs,
-      toggleLogging: store.dispatch.Common.Console.toggleLogging,
+      clearLogs: store.commit.Console.clearLogs,
+      toggleLogging: store.dispatch.Console.toggleLogging,
       isJSON,
       notificationText,
       notify: _notify,

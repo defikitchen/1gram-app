@@ -205,18 +205,16 @@ export default defineComponent({
     const { wallet, store } = useVuex();
     const router = useRouter();
     const update = (force = false) =>
-      store.dispatch.Common.Wallet.updateWallet({
+      store.dispatch.Wallet.updateWallet({
         address: wallet.value.address,
         force
       });
-    const stopLoading = () => store.commit.Common.Loading.stopLoading();
+    const stopLoading = () => store.commit.Loading.stopLoading();
     const deploy = () =>
-      store.dispatch.Common.Wallet.deployTONWallet({ wallet: wallet.value });
+      store.dispatch.Wallet.deployTONWallet({ wallet: wallet.value });
     const copy = (val: string) => useCopy(val);
-    const forging = computed(() => store.state.Common.Wallet.forging);
-    const forgingString = computed(
-      () => store.state.Common.Wallet.forgingString
-    );
+    const forging = computed(() => store.state.Wallet.forging);
+    const forgingString = computed(() => store.state.Wallet.forgingString);
 
     const price = computed(() => {
       const rate = useUsdPrice(
@@ -252,16 +250,16 @@ export default defineComponent({
     });
 
     const expert = computed(() => {
-      return store.state.Common.Settings.mode === "expert";
+      return store.state.Settings.mode === "expert";
     });
 
     const openTransaction = (tx: Tx) => {
-      store.commit.Common.Wallet.setTransaction(tx);
+      store.commit.Wallet.setTransaction(tx);
       router.push("/wallet/transaction");
     };
 
     const backup = async () => {
-      const result = await store.dispatch.Common.Login.promptPin({
+      const result = await store.dispatch.Login.promptPin({
         persistent: false
       });
       if (result)
@@ -274,7 +272,7 @@ export default defineComponent({
     });
 
     const grant = () =>
-      store.dispatch.Common.Wallet.grantTONWallet({ wallet: wallet.value });
+      store.dispatch.Wallet.grantTONWallet({ wallet: wallet.value });
 
     return {
       ...useFilters(),
@@ -284,8 +282,8 @@ export default defineComponent({
       send: () => router.push("/wallet/send"),
       receive: () => router.push("/wallet/receive"),
       update,
-      loading: computed(() => store.state.Common.Loading.loading),
-      updating: computed(() => store.state.Common.Wallet.updating as boolean),
+      loading: computed(() => store.state.Loading.loading),
+      updating: computed(() => store.state.Wallet.updating as boolean),
       transactions,
       expert,
       openTransaction,

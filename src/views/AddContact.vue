@@ -63,10 +63,10 @@ export default defineComponent({
       network ? network.protocol + " - " + network.name : "";
     const { store } = useVuex();
     const router = useRouter();
-    const network = ref(networkKey(store.state.Common.Wallet.network));
+    const network = ref(networkKey(store.state.Wallet.network));
     const nameField = ref<null | HTMLInputElement>(null);
-    const networks = computed(() => store.state.Common.Wallet.networks);
-    const contacts = computed(() => store.state.Common.Contacts.contacts);
+    const networks = computed(() => store.state.Wallet.networks);
+    const contacts = computed(() => store.state.Contacts.contacts);
 
     const defaultForm = {
       name: "",
@@ -83,7 +83,7 @@ export default defineComponent({
     };
 
     const remove = (id: string) => {
-      store.commit.Common.Contacts.removeContact(
+      store.commit.Contacts.removeContact(
         contacts.value.find(c => c.id === id) as Contact
       );
       reset();
@@ -139,9 +139,9 @@ export default defineComponent({
       };
 
       if (!id) {
-        store.commit.Common.Contacts.addContact(contact);
+        store.commit.Contacts.addContact(contact);
       } else {
-        store.commit.Common.Contacts.editContact(contact);
+        store.commit.Contacts.editContact(contact);
       }
 
       reset();

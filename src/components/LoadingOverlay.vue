@@ -28,14 +28,10 @@ import { useVuex } from "@/hooks/use-vuex";
 export default defineComponent({
   setup() {
     const { store } = useVuex();
-    const status = computed(() => store.state.Common.Loading.status);
-    const loadingOverlay = computed(
-      () => store.state.Common.Loading.loadingOverlay
-    );
-    const loading = computed(() => store.state.Common.Loading.loading);
-    const redirectButton = computed(
-      () => store.state.Common.Loading.redirectButton
-    );
+    const status = computed(() => store.state.Loading.status);
+    const loadingOverlay = computed(() => store.state.Loading.loadingOverlay);
+    const loading = computed(() => store.state.Loading.loading);
+    const redirectButton = computed(() => store.state.Loading.redirectButton);
 
     return {
       status,

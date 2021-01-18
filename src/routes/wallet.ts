@@ -58,7 +58,7 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, from, next) {
-      to.meta.flat = store.state.Common.Wallet.wallets.length > 0;
+      to.meta.flat = store.state.Wallet.wallets.length > 0;
       next();
     }
   },
@@ -83,7 +83,7 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, _, next) {
-      const wallet = store.getters.Common.Wallet?.wallet;
+      const wallet = store.getters.Wallet?.wallet;
       const address = wallet?.address;
       if (address) {
         to.meta.title = wallet?.name as string;
@@ -105,7 +105,7 @@ export const walletRoutes: RouteWithProps[] = [
       backRoute: "/wallet"
     },
     beforeEnter(to, _, next) {
-      const { transaction, wallet } = store.state.Common.Wallet as WalletState;
+      const { transaction, wallet } = store.state.Wallet as WalletState;
       if (!wallet || !transaction) return next("/portfolio");
       const inn = wallet === transaction.to;
       to.meta.toolbarType = inn ? "primary" : "accent";
@@ -148,7 +148,7 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, _, next) {
-      const { wallet } = store.getters.Common.Wallet;
+      const { wallet } = store.getters.Wallet;
       if (!wallet) next("/portfolio");
       else {
         to.meta.toolbarType = wallet.color || "primary";
@@ -168,7 +168,7 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, _, next) {
-      const { wallet } = store.getters.Common.Wallet;
+      const { wallet } = store.getters.Wallet;
       if (wallet) {
         to.meta.title = "Receive to " + shortify(wallet.address);
       }
@@ -200,7 +200,7 @@ export const walletRoutes: RouteWithProps[] = [
       backRoute: "/wallet"
     },
     beforeEnter(_, __, next) {
-      const transaction = store.state.Common.Wallet.pendingTransaction;
+      const transaction = store.state.Wallet.pendingTransaction;
       transaction ? next() : next("/wallet/send");
     }
   },
@@ -234,8 +234,8 @@ export const walletRoutes: RouteWithProps[] = [
       stopLoading: true
     },
     beforeEnter(to, _, next) {
-      const { wallet } = store.getters.Common.Wallet;
-      if (!wallet || !wallet.mnemonic) return next("/portfolio");
+      const { wallet } = store.getters.Wallet;
+      if (!wallet?.mnemonic) return next("/portfolio");
       to.meta.title = `Back up ${wallet.name}`;
       to.meta.toolbarType = wallet.color || "primary";
       next();

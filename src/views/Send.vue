@@ -194,13 +194,11 @@ export default defineComponent({
     const {
       store: { state, commit, getters, dispatch }
     } = useVuex();
-    const loading = computed(() => state.Common.Loading.loading);
-    const pendingTransaction = computed(
-      () => state.Common.Wallet.pendingTransaction
-    );
-    const wallets = computed(() => state.Common.Wallet.wallets);
-    const wallet = computed(() => getters.Common.Wallet.wallet as Wallet);
-    const addresses = computed(() => getters.Common.Wallet.usedAddresses);
+    const loading = computed(() => state.Loading.loading);
+    const pendingTransaction = computed(() => state.Wallet.pendingTransaction);
+    const wallets = computed(() => state.Wallet.wallets);
+    const wallet = computed(() => getters.Wallet.wallet as Wallet);
+    const addresses = computed(() => getters.Wallet.usedAddresses);
     const qr = ref<null | HTMLElement>(null);
     const amount = ref<null | HTMLElement>(null);
     const fee = ref(0);
@@ -217,7 +215,7 @@ export default defineComponent({
     const loadingFee = ref(false);
 
     const comboboxItems = computed(() => {
-      const fromWallet = state.Common.Wallet.wallets
+      const fromWallet = state.Wallet.wallets
         .map(w => ({
           type: "wallet",
           wallet: w,
@@ -227,7 +225,7 @@ export default defineComponent({
         .filter(item => wallet.value.address !== item.wallet.address)
         .filter(item => wallet.value.network.name === item.wallet.network.name);
 
-      const fromContacts = state.Common.Contacts.contacts.map(c => ({
+      const fromContacts = state.Contacts.contacts.map(c => ({
         type: "contact",
         name: c.name,
         addr: c.address,
@@ -329,7 +327,7 @@ export default defineComponent({
     const touch = () => (form.touched = true);
 
     onMounted(() => {
-      commit.Common.Loading.stopLoading();
+      commit.Loading.stopLoading();
       setTimeout(() => {
         amount?.value?.focus();
       }, 200);
@@ -353,9 +351,9 @@ export default defineComponent({
               | "fld.ton.dev"
           );
 
-          let pin = state.Common.Login.pin;
+          let pin = state.Login.pin;
           if (!pin)
-            pin = await dispatch.Common.Login.promptPin({
+            pin = await dispatch.Login.promptPin({
               persistent: false
             });
           const keypair: KeyPair = JSON.parse(
@@ -421,7 +419,7 @@ export default defineComponent({
             .times(10 ** wallet.value.network.decimals)
             .toNumber()
         };
-        commit.Common.Wallet.setPendingTx(transaction);
+        commit.Wallet.setPendingTx(transaction);
         resetForm();
         router.push("/wallet/receipt");
       }

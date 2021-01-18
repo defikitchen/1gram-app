@@ -75,10 +75,10 @@ router.beforeEach(async (to, from, next) => {
   const { state } = store;
 
   const now = new Date().getTime();
-  const expiresAt = state.Common.Login.seshExpiresAt;
-  const { pinCreated, disclaimerConsent } = state.Common.Login;
+  const expiresAt = state.Login.seshExpiresAt;
+  const { pinCreated, disclaimerConsent } = state.Login;
   const validSesh = pinCreated && expiresAt && expiresAt >= now;
-  const expertMode = state.Common.Settings.mode === "expert";
+  const expertMode = state.Settings.mode === "expert";
   const isWelcome = to.name === "welcome";
 
   if (!disclaimerConsent && !isWelcome) {
@@ -89,18 +89,14 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (!validSesh && !expertMode && !isWelcome) {
-    await store.dispatch.Common.Login.promptPin({
+    await store.dispatch.Login.promptPin({
       persistent: true
     });
   }
 
-  if (
-    state.Common.Wallet.forging ||
-    state.Common.Wallet.sending ||
-    from.meta.cantGoBack
-  ) {
+  if (state.Wallet.forging || state.Wallet.sending || from.meta.cantGoBack) {
     // todo: maybe turn back on
-    // if (to.name !== "Login" && !state.Common.Login.auth) {
+    // if (to.name !== "Login" && !state.Login.auth) {
     //   next("/login-pin");
     // }
 
@@ -113,7 +109,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.stopLoading) {
-    store.commit.Common.Loading.stopLoading();
+    store.commit.Loading.stopLoading();
   }
 
   if (

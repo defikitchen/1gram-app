@@ -121,22 +121,18 @@ export default defineComponent({
   mixins: [Vue2Filters.mixin],
   setup() {
     const { store } = useVuex();
-    const contacts = computed(() => store.state.Common.Contacts.contacts);
+    const contacts = computed(() => store.state.Contacts.contacts);
 
     const router = useRouter();
     const copy = (str: string) => useCopy(str);
     const filter = ref("");
-    const wallets = computed(() => store.state.Common.Wallet.wallets || []);
+    const wallets = computed(() => store.state.Wallet.wallets || []);
     const selectedAddress = ref("");
     const sheet = ref(false);
-    const networkName = ref(
-      store.getters.Common.Wallet.wallet?.network.name || null
-    );
+    const networkName = ref(store.getters.Wallet.wallet?.network.name || null);
 
     const getNetworkByName = (name: string) => {
-      return store.state.Common.Wallet.networks.find(
-        network => network.name === name
-      );
+      return store.state.Wallet.networks.find(network => network.name === name);
     };
 
     const edit = (contact: Contact) => {
@@ -178,14 +174,14 @@ export default defineComponent({
     };
 
     const selectWallet = (wallet: Wallet) => {
-      store.commit.Common.Wallet.setWallet(wallet);
+      store.commit.Wallet.setWallet(wallet);
       const to = selectedAddress.value;
       const from = wallet.address || "";
       if (!from || !to) {
         console.log(to, from, wallet);
         return;
       }
-      store.commit.Common.Wallet.setPendingTx({
+      store.commit.Wallet.setPendingTx({
         amount: null,
         estimatedFees: null,
         from,

@@ -5,6 +5,6 @@ import { Wallet } from "@/models/wallet";
 export const useVuex = () => {
   return {
     store,
-    wallet: computed(() => store.getters.Common.Wallet.wallet as Wallet)
+    wallet: computed(() => store.getters.Wallet.wallet as Wallet)
   };
 };

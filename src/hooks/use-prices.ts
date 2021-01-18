@@ -31,8 +31,8 @@ export const usePrices = (tokens: number[] = defaultTokens) => {
     await Promise.all([
       listFiatPrices(),
       listTokens(
-        store.state.Common.Wallet.wallets,
-        store.getters.Common.Wallet.wallet as Wallet
+        store.state.Wallet.wallets,
+        store.getters.Wallet.wallet as Wallet
       )
     ]);
     return true;

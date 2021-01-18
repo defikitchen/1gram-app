@@ -493,8 +493,8 @@ export default defineComponent({
     } = useVuex();
     const { parseERC20Tx } = useERC20();
     const { tokenPrices } = usePrices();
-    const Wallet = state.Common.Wallet as WalletState;
-    const wallet = computed(() => getters.Common.Wallet.wallet as Wallet);
+    const Wallet = state.Wallet as WalletState;
+    const wallet = computed(() => getters.Wallet.wallet as Wallet);
     const tx = computed(() => Wallet.transaction);
     const msg = computed(() => {
       if (!tx.value) return null;
@@ -510,7 +510,7 @@ export default defineComponent({
     });
 
     const sendto = (addr: string) => {
-      commit.Common.Wallet.setPendingTx({
+      commit.Wallet.setPendingTx({
         amount: null,
         from: wallet.value.address,
         to: addr

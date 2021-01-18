@@ -59,7 +59,8 @@
               <v-list-item-action-text class="text-right">
                 {{
                   token(
-                    pendingTransaction.estimatedFees,
+                    (pendingTransaction && pendingTransaction.estimatedFees) ||
+                      0,
                     wallet.network.symbol,
                     wallet.network.decimals
                   )
@@ -124,12 +125,12 @@ export default defineComponent({
   setup() {
     const { store } = useVuex();
     const router = useRouter();
-    const loading = computed(() => store.state.Common.Loading.loading);
+    const loading = computed(() => store.state.Loading.loading);
     const pendingTransaction = computed(
-      () => store.state.Common.Wallet.pendingTransaction
+      () => store.state.Wallet.pendingTransaction
     );
-    const sending = computed(() => store.state.Common.Wallet.sending);
-    const wallet = computed(() => store.getters.Common.Wallet.wallet as Wallet);
+    const sending = computed(() => store.state.Wallet.sending);
+    const wallet = computed(() => store.getters.Wallet.wallet as Wallet);
 
     onBeforeMount(() => {
       if (!pendingTransaction.value || !wallet.value)
@@ -137,7 +138,7 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      store.commit.Common.Loading.stopLoading();
+      store.commit.Loading.stopLoading();
     });
 
     const swipeText = computed(() => {
@@ -150,19 +151,19 @@ export default defineComponent({
     });
 
     const submit = async () => {
-      const receiverIsMe = store.state.Common.Wallet.wallets.find(
+      const receiverIsMe = store.state.Wallet.wallets.find(
         w => w.address === pendingTransaction?.value?.to
       );
 
       if (!pendingTransaction.value) return;
       try {
-        await store.dispatch.Common.Wallet.send();
-        store.commit.Common.Wallet.setPendingTx(null);
+        await store.dispatch.Wallet.send();
+        store.commit.Wallet.setPendingTx(null);
         router.push("/wallet");
         if (receiverIsMe) {
           setTimeout(
             () =>
-              store.dispatch.Common.Wallet.updateWallet({
+              store.dispatch.Wallet.updateWallet({
                 address: receiverIsMe.address
               }),
             3000

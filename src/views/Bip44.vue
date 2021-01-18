@@ -83,7 +83,7 @@ export default defineComponent({
     const {
       store: { state, dispatch, commit }
     } = useVuex();
-    const Wallet = state.Common.Wallet as WalletState;
+    const Wallet = state.Wallet as WalletState;
 
     const form = reactive({
       hexSeed: "",
@@ -161,14 +161,14 @@ export default defineComponent({
     const getWallet = async () => {
       if (error.value) return;
 
-      const key = await (dispatch.Common.Wallet as any).getKey();
-      commit.Common.Wallet.addKey(key);
+      const key = await (dispatch.Wallet as any).getKey();
+      commit.Wallet.addKey(key);
       try {
-        await dispatch.Common.Wallet.forgeWallet({
+        await dispatch.Wallet.forgeWallet({
           privateKey: key
         });
       } catch (error) {
-        commit.Common.Wallet.setForging(false);
+        commit.Wallet.setForging(false);
         handleError(error, error, 6000);
       }
     };

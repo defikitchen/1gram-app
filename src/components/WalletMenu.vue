@@ -71,9 +71,9 @@ export default defineComponent({
     const { store } = useVuex();
     const router = useRouter();
 
-    const wallet = computed(() => store.getters.Common.Wallet.wallet);
+    const wallet = computed(() => store.getters.Wallet.wallet);
     const wallets = computed(() =>
-      (store.state.Common.Wallet.wallets || []).sort((a, b) => {
+      (store.state.Wallet.wallets || []).sort((a, b) => {
         if (a.address === wallet.value?.address) return -100;
         return a.name > b.name ? 0 : -1;
       })
@@ -86,10 +86,10 @@ export default defineComponent({
       } else router.push("?");
     };
 
-    const setWallet = store.commit.Common.Wallet.setWallet;
+    const setWallet = store.commit.Wallet.setWallet;
 
     const openHelp = () => {
-      store.commit.Common.Help.setHelpOpen(true);
+      store.commit.Help.setHelpOpen(true);
       close();
     };
 

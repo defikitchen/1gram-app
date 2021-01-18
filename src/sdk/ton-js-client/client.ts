@@ -10,7 +10,7 @@ export const getClient = async (
   setWasmOptions({
     addHTML: console.log
   });
-  const networks = [...defaultNetworks, ...store.state.Common.Wallet.networks];
+  const networks = [...defaultNetworks, ...store.state.Wallet.networks];
 
   const network: Network =
     networks.find(n => n.name === networkName) || defaultTonNetwork;

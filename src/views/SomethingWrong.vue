@@ -59,10 +59,8 @@ export default defineComponent({
   },
   setup(_props, ctx) {
     const { store } = useVuex();
-    const expert = computed(
-      () => store.state.Common.Settings.mode === "expert"
-    );
-    const stopLoading = store.commit.Common.Loading.stopLoading;
+    const expert = computed(() => store.state.Settings.mode === "expert");
+    const stopLoading = store.commit.Loading.stopLoading;
 
     onMounted(() => {
       stopLoading();

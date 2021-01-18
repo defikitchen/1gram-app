@@ -62,8 +62,8 @@ import { useFilters } from "@/lib/format";
 export default defineComponent({
   setup() {
     const { store } = useVuex();
-    const loading = computed(() => store.state.Common.Loading.loading);
-    const wallet = computed(() => store.getters.Common.Wallet.wallet);
+    const loading = computed(() => store.state.Loading.loading);
+    const wallet = computed(() => store.getters.Wallet.wallet);
     const copy = useCopy;
     const qr = ref("");
     const router = useRouter();
@@ -75,7 +75,7 @@ export default defineComponent({
     const getQR = async (value: string) => {
       if (!value) return "";
       try {
-        return await store.dispatch.Common.getQR(value);
+        return await store.dispatch.getQR(value);
       } catch (error) {
         console.warn(error);
         return "";
@@ -95,7 +95,7 @@ export default defineComponent({
       _qr = qr.value,
       name = `${wallet.value?.name}-address.png`
     ) => {
-      store.dispatch.Common.downloadURL({ url: _qr, name });
+      store.dispatch.downloadURL({ url: _qr, name });
     };
 
     return {

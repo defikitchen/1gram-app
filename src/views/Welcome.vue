@@ -59,26 +59,24 @@ export default defineComponent({
     const { store } = useVuex();
     const router = useRouter();
 
-    const settings = computed(() => store.state.Common.Settings);
-    const login = computed(() => store.state.Common.Login.disclaimerConsent);
+    const settings = computed(() => store.state.Settings);
+    const login = computed(() => store.state.Login.disclaimerConsent);
     const forging = computed(
-      () =>
-        store.state.Common.Wallet.forging &&
-        store.state.Common.Wallet.forgingString
+      () => store.state.Wallet.forging && store.state.Wallet.forgingString
     );
 
     const accept = async () => {
-      store.commit.Common.Login.acceptDisclaimer();
+      store.commit.Login.acceptDisclaimer();
 
-      if (store.state.Common.Wallet.wallets.length <= 0) {
-        if (!store.state.Common.Login.pinCreated) {
+      if (store.state.Wallet.wallets.length <= 0) {
+        if (!store.state.Login.pinCreated) {
           await usePin().getPin(true);
         }
-        const network = store.state.Common.Wallet.networks.find(
+        const network = store.state.Wallet.networks.find(
           w => w.name === "main.ton.dev"
         ) as Network;
-        store.commit.Common.Wallet.setNetwork(network);
-        store.dispatch.Common.Wallet.forgeWallet({
+        store.commit.Wallet.setNetwork(network);
+        store.dispatch.Wallet.forgeWallet({
           name: "My Wallet"
         });
       } else {
@@ -88,7 +86,7 @@ export default defineComponent({
 
     const update = (force?: boolean) => {
       updatePrices(force).then(() =>
-        store.dispatch.Common.Wallet.updateWallets(force)
+        store.dispatch.Wallet.updateWallets(force)
       );
     };
 

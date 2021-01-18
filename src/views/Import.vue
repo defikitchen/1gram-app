@@ -139,12 +139,9 @@ export default defineComponent({
     const qr = ref<HTMLInputElement>();
     const isCordova = getPlatform() === Platform.Cordova;
     const allLoading = computed(
-      () =>
-        state.Common.Loading.loading ||
-        state.Common.Wallet.forging ||
-        qrLoading.value
+      () => state.Loading.loading || state.Wallet.forging || qrLoading.value
     );
-    const network = computed(() => state.Common.Wallet.network);
+    const network = computed(() => state.Wallet.network);
     const items = [
       { tab: "One", title: "Secret Phrase" },
       { tab: "Two", title: "Private Key" },
@@ -263,13 +260,13 @@ export default defineComponent({
           privateKey = "0x" + privateKey;
 
         if (tab.value === 2) {
-          await dispatch.Common.Wallet.addViewWallet({
+          await dispatch.Wallet.addViewWallet({
             address: form.value.address,
             network: network.value as Network
           });
         } else
           await addTimeoutToPromise(
-            dispatch.Common.Wallet.forgeWallet({
+            dispatch.Wallet.forgeWallet({
               imported: true,
               mnemonic: form.value.mnemonic || undefined,
               path: form.value.path || undefined,
@@ -279,7 +276,7 @@ export default defineComponent({
             forgeTimeout
           );
       } catch (error) {
-        commit.Common.Wallet.setForging(false);
+        commit.Wallet.setForging(false);
         handleError(error, error, 6000);
       }
       reset();

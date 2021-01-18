@@ -8,7 +8,7 @@ export const Help: DirectiveOptions = {
     el.setAttribute("data-help", value);
 
     const updateActiveState = () => {
-      const step = getters.Common.Help.activeHelpStep;
+      const step = getters.Help.activeHelpStep;
       const isActive = step.name === value;
       el.setAttribute("data-help-active", isActive + "");
     };

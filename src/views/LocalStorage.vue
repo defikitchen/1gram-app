@@ -55,7 +55,7 @@ export default defineComponent({
     onMounted(async () => {
       await pause(200);
       input?.value?.focus();
-      store.commit.Common.Loading.stopLoading();
+      store.commit.Loading.stopLoading();
     });
 
     const storage = computed({

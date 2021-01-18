@@ -103,9 +103,9 @@ export default defineComponent({
     } = useVuex();
     const router = useRouter();
 
-    const loading = computed(() => state.Common.Loading.loading);
-    const forging = computed(() => state.Common.Wallet.forging);
-    const wallet = computed(() => getters.Common.Wallet.wallet);
+    const loading = computed(() => state.Loading.loading);
+    const forging = computed(() => state.Wallet.forging);
+    const wallet = computed(() => getters.Wallet.wallet);
     const mnemonic = ref("");
     const phrase = ref(12);
     const randomWords = ref([] as string[]);
@@ -128,7 +128,7 @@ export default defineComponent({
     watch(() => wordsFromLength.value, getRandomWords);
 
     const getMnemonic = () => {
-      const pin = state.Common.Login.pin || "";
+      const pin = state.Login.pin || "";
       const encrypted =
         wallet.value?.keyPair && wallet.value?.mnemonic
           ? wallet?.value.mnemonic
@@ -158,7 +158,7 @@ export default defineComponent({
     const submit = async () => {
       if (valid.value) {
         const redirect = ctx.root.$route.query.redirect as string | undefined;
-        commit.Common.Wallet.patchWallet({
+        commit.Wallet.patchWallet({
           address: wallet.value?.address || "",
           update: { backedUp: true }
         });

@@ -13,9 +13,8 @@ export const notificationRoutes: RouteWithProps[] = [
       transition: "fade",
       showToolbar: true
     },
-    beforeEnter(to, from, next) {
-      const notification = ((store.state as any).Common
-        .Notifications as NotificationsState).notifications.find(
+    beforeEnter(to, _, next) {
+      const notification = store.state.Notifications.notifications.find(
         n => n.id === to.params.id
       );
       if (notification) {

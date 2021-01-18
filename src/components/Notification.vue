@@ -58,9 +58,7 @@ export default defineComponent({
   setup(props) {
     const { store } = useVuex();
     const router = useRouter();
-    const expert = computed(
-      () => store.state.Common.Settings.mode === "expert"
-    );
+    const expert = computed(() => store.state.Settings.mode === "expert");
     const className = ref("");
     let timer: any;
 
@@ -79,7 +77,7 @@ export default defineComponent({
 
     const open = async () => {
       if (!props.notification) return;
-      store.dispatch.Common.Loading.startLoading({
+      store.dispatch.Loading.startLoading({
         command: "startLoadingOverlay",
         value: "Loading…"
       });
@@ -88,8 +86,8 @@ export default defineComponent({
       router
         .push({ path: "/notification/" + props.notification.id })
         .then(() => {
-          store.commit.Common.Loading.stopLoading();
-          store.commit.Common.Notifications.dismiss(
+          store.commit.Loading.stopLoading();
+          store.commit.Notifications.dismiss(
             (props.notification as NotificationModel).id
           );
         });

@@ -105,19 +105,19 @@ export default defineComponent({
 
     const open = (wallet: Wallet) => {
       const { commit } = store;
-      store.commit.Common.Wallet.setWallet(wallet);
+      store.commit.Wallet.setWallet(wallet);
       router.push("/wallet");
     };
 
-    const updating = computed(() => store.state.Common.Wallet.updatingAll);
-    const wallets = computed(() => store.state.Common.Wallet?.wallets || []);
-    const wallet = computed(() => store.getters.Common.Wallet.wallet);
-    const network = computed(() => store.state.Common.Wallet.network);
-    const settings = computed(() => store.state.Common.Settings);
+    const updating = computed(() => store.state.Wallet.updatingAll);
+    const wallets = computed(() => store.state.Wallet?.wallets || []);
+    const wallet = computed(() => store.getters.Wallet.wallet);
+    const network = computed(() => store.state.Wallet.network);
+    const settings = computed(() => store.state.Settings);
 
     const update = (force?: boolean) => {
       updatePrices(force).then(() =>
-        store.dispatch.Common.Wallet.updateWallets(force)
+        store.dispatch.Wallet.updateWallets(force)
       );
     };
 

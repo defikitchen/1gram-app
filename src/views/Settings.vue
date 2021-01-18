@@ -284,11 +284,9 @@ export default defineComponent({
   components: { NetworkList },
   setup(_, { root }) {
     const { store } = useVuex();
-    const wallet = computed(() => store.getters.Common.Wallet.wallet);
+    const wallet = computed(() => store.getters.Wallet.wallet);
     const router = useRouter();
-    const expert = computed(
-      () => store.state.Common.Settings.mode === "expert"
-    );
+    const expert = computed(() => store.state.Settings.mode === "expert");
     const { addressUrl } = useExplorer();
     const qr = ref("");
     const qrPub = ref("");
@@ -309,7 +307,7 @@ export default defineComponent({
         wallet?.value?.color ||
         (root.$vuetify.theme.currentTheme.primary as string),
       set: (value: string) => {
-        store.commit.Common.Wallet.patchWallet({
+        store.commit.Wallet.patchWallet({
           address: wallet?.value?.address || "",
           update: { color: value }
         });
@@ -329,7 +327,7 @@ export default defineComponent({
         return;
       }
       try {
-        const pin = await store.dispatch.Common.Login.promptPin({
+        const pin = await store.dispatch.Login.promptPin({
           persistent: false
         });
         if (pin) panels.value[key] = true;
@@ -339,14 +337,14 @@ export default defineComponent({
     };
 
     const backup = async () => {
-      const result = await store.dispatch.Common.Login.promptPin({
+      const result = await store.dispatch.Login.promptPin({
         persistent: false
       });
       if (result) router.push("/wallet/backup?redirect=" + root.$route.path);
     };
 
     const privateKey = computed(() => {
-      const pin = store.state.Common.Login.pin;
+      const pin = store.state.Login.pin;
       if (!pin)
         return "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
       const pair: KeyPair = JSON.parse(decrypt(wallet?.value?.keyPair, pin));
@@ -354,7 +352,7 @@ export default defineComponent({
     });
 
     const publicKey = computed(() => {
-      const pin = store.state.Common.Login.pin;
+      const pin = store.state.Login.pin;
       if (!pin)
         return "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
       const pair: KeyPair = JSON.parse(decrypt(wallet?.value?.keyPair, pin));
@@ -366,8 +364,8 @@ export default defineComponent({
         qr.value = "";
         qrPub.value = "";
       } else {
-        qr.value = await store.dispatch.Common.getQR(privateKey.value);
-        qrPub.value = await store.dispatch.Common.getQR(publicKey.value);
+        qr.value = await store.dispatch.getQR(privateKey.value);
+        qrPub.value = await store.dispatch.getQR(publicKey.value);
       }
     };
 
@@ -383,18 +381,18 @@ export default defineComponent({
       name = `${wallet?.value?.name}.pk`
     ) => {
       const payload = { value: key, name, encoding: "hex" };
-      store.dispatch.Common.downloadString(payload);
+      store.dispatch.downloadString(payload);
     };
 
     const downloadQR = (
       _qr = qr.value,
       name = `${wallet?.value?.name}.png`
     ) => {
-      store.dispatch.Common.downloadURL({ url: _qr, name });
+      store.dispatch.downloadURL({ url: _qr, name });
     };
 
     const mnemonic = computed(() => {
-      const pin = store.state.Common.Login.pin;
+      const pin = store.state.Login.pin;
       if (!pin)
         return "xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx xxxxxx";
       const decrypted = decrypt(wallet?.value?.mnemonic, pin);
@@ -405,7 +403,7 @@ export default defineComponent({
       const name = await root.$dialog.prompt({
         title: "Enter a new name"
       });
-      const exists = store.state.Common.Wallet.wallets
+      const exists = store.state.Wallet.wallets
         .filter(w => w.address !== wallet.value?.address)
         .map(w => w.name)
         .find(n => n === name);
@@ -419,7 +417,7 @@ export default defineComponent({
         });
         changeName();
       } else {
-        store.commit.Common.Wallet.patchWallet({
+        store.commit.Wallet.patchWallet({
           address: wallet.value?.address || "",
           update: { name }
         });
@@ -433,7 +431,7 @@ export default defineComponent({
 
     const remove = () => {
       if (!wallet.value) return;
-      store.dispatch.Common.Wallet.removeWallet(wallet.value);
+      store.dispatch.Wallet.removeWallet(wallet.value);
     };
 
     return {

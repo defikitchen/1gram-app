@@ -66,21 +66,21 @@ export default defineComponent({
       store: { state, getters, commit, dispatch }
     } = useVuex();
     const router = useRouter();
-    const loading = computed(() => state.Common.Loading.loading);
-    const help = computed(() => state.Common.Help);
-    const activeHelpStep = computed(() => getters.Common.Help.activeHelpStep);
+    const loading = computed(() => state.Loading.loading);
+    const help = computed(() => state.Help);
+    const activeHelpStep = computed(() => getters.Help.activeHelpStep);
     const meta = useMeta(ctx);
     const notification = ref<Notification | null>(null);
     const { initBasePrices, updatePrices } = usePrices();
     let appTimer: any;
 
     const timer = async () => {
-      const oldVal = state.Common.Loading.online;
+      const oldVal = state.Loading.online;
       const { onLine } = navigator;
 
       if (oldVal !== onLine) {
         notification.value?.dismiss();
-        commit.Common.Loading.setOnline(onLine);
+        commit.Loading.setOnline(onLine);
         const result = !onLine
           ? await handleError(
               { onLine },
@@ -101,13 +101,13 @@ export default defineComponent({
 
     onBeforeMount(async () => {
       await initBasePrices();
-      dispatch.Common.Wallet.updateWallets(false);
+      dispatch.Wallet.updateWallets(false);
       appTimer = setInterval(timer, 1000);
       timer();
-      dispatch.Common.Notifications.dismissAll();
-      dispatch.Common.Settings.initTheme();
-      updatePrices().then(() => dispatch.Common.Wallet.updateWallets(false));
-      if (state.Common.Console.logging) dispatch.Common.Console.enableLogging();
+      dispatch.Notifications.dismissAll();
+      dispatch.Settings.initTheme();
+      updatePrices().then(() => dispatch.Wallet.updateWallets(false));
+      if (state.Console.logging) dispatch.Console.enableLogging();
     });
 
     onBeforeUnmount(() => clearInterval(appTimer));

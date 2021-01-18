@@ -27,15 +27,15 @@ export default defineComponent({
     } = useVuex();
 
     const drawerOpen = computed({
-      get: () => state.Common.NavBar.drawerOpen,
-      set: (value: boolean) => commit.Common.NavBar.setDrawer({ value })
+      get: () => state.NavBar.drawerOpen,
+      set: (value: boolean) => commit.NavBar.setDrawer({ value })
     });
 
     const notifications = computed(() => {
-      const items = state.Common.Notifications.notifications;
+      const items = state.Notifications.notifications;
       return !drawerOpen.value ? [...items].reverse().slice(0, 30) : [];
     });
-    const dismiss = commit.Common.Notifications.dismiss;
+    const dismiss = commit.Notifications.dismiss;
 
     return {
       drawerOpen,

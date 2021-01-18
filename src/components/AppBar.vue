@@ -71,14 +71,14 @@ export default defineComponent({
     const router = useRouter();
     const meta = useMeta(ctx);
     const route = computed(() => ctx.root.$route);
-    const themeColor = computed(() => getters.Common.Wallet.wallet?.color);
-    const openDrawer = () => commit.Common.NavBar.setDrawer({ value: true });
-    const toggleHelp = dispatch.Common.Help.toggle;
-    const helpOpen = computed(() => state.Common.Help.open);
+    const themeColor = computed(() => getters.Wallet.wallet?.color);
+    const openDrawer = () => commit.NavBar.setDrawer({ value: true });
+    const toggleHelp = dispatch.Help.toggle;
+    const helpOpen = computed(() => state.Help.open);
     const notificationCount = computed(
-      () => getters.Common.Notifications.notificationCount
+      () => getters.Notifications.notificationCount
     );
-    const loading = computed(() => state.Common.Loading.loading);
+    const loading = computed(() => state.Loading.loading);
 
     const hasTitlePassengers = computed(
       () => (titlePortal?.value as any)?.transports["page-title"]?.length > 0

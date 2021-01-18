@@ -74,7 +74,7 @@ export default defineComponent({
     const disabled = computed(() => route.value.path === "/welcome");
 
     return {
-      wallet: computed(() => getters.Common.Wallet.wallet),
+      wallet: computed(() => getters.Wallet.wallet),
       disabled
     };
   }

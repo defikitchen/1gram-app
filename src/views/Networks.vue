@@ -61,7 +61,7 @@ import { useRouter } from "@/hooks/use-router";
 export default defineComponent({
   setup(_, ctx) {
     const { store } = useVuex();
-    const networks = computed(() => store.state.Common.Wallet.networks);
+    const networks = computed(() => store.state.Wallet.networks);
     const router = useRouter();
 
     const submit = () => router.push("?modal=network");
@@ -72,8 +72,8 @@ export default defineComponent({
         text: "Are you sure you want to remove this Network?"
       });
       if (confirmed) {
-        store.commit.Common.Wallet.removeNetwork(network);
-        store.dispatch.Common.Notifications.notify({
+        store.commit.Wallet.removeNetwork(network);
+        store.dispatch.Notifications.notify({
           text: "Removed " + network.name,
           duration: 4000,
           type: "info"

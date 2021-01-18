@@ -8,25 +8,25 @@ export default defineComponent({
   setup(_, ctx) {
     const { baseCurrency } = usePrices();
     const { store } = useVuex();
-    const network = computed(() => store.state.Common.Wallet.network);
-    const settings = computed(() => store.state.Common.Settings);
+    const network = computed(() => store.state.Wallet.network);
+    const settings = computed(() => store.state.Settings);
 
     const darkMode = computed({
-      get: () => store.state.Common.Settings.theme === "dark",
-      set: () => store.dispatch.Common.Settings.toggleTheme()
+      get: () => store.state.Settings.theme === "dark",
+      set: () => store.dispatch.Settings.toggleTheme()
     });
 
     const expertMode = computed({
-      get: () => store.state.Common.Settings.mode === "expert",
-      set: () => store.dispatch.Common.Settings.toggleMode()
+      get: () => store.state.Settings.mode === "expert",
+      set: () => store.dispatch.Settings.toggleMode()
     });
 
     const toggleDarkMode = () => {
-      store.dispatch.Common.Settings.toggleTheme();
+      store.dispatch.Settings.toggleTheme();
     };
 
     const toggleExpertMode = () => {
-      store.dispatch.Common.Settings.toggleMode();
+      store.dispatch.Settings.toggleMode();
     };
 
     const clear = async () => {

@@ -46,25 +46,23 @@ import { useVuex } from "@/hooks/use-vuex";
 export default defineComponent({
   setup() {
     const { store } = useVuex();
-    const help = computed(() => store.state.Common.Help);
-    const showOverlay = computed(
-      () => store.getters.Common.Help.showHelpOverlay
-    );
-    const last = computed(() => store.getters.Common.Help.lastHelpStep);
+    const help = computed(() => store.state.Help);
+    const showOverlay = computed(() => store.getters.Help.showHelpOverlay);
+    const last = computed(() => store.getters.Help.lastHelpStep);
 
     const closeHelp = () => {
-      store.commit.Common.Help.setHelpOpen(false);
+      store.commit.Help.setHelpOpen(false);
       setTimeout(() => {
-        store.commit.Common.Help.setActiveIndex(0);
+        store.commit.Help.setActiveIndex(0);
       }, 300);
     };
 
     const openHelp = () => {
-      store.commit.Common.Help.setHelpOpen(true);
+      store.commit.Help.setHelpOpen(true);
     };
 
     const next = () => {
-      store.dispatch.Common.Help.nextHelpStep();
+      store.dispatch.Help.nextHelpStep();
     };
 
     return {

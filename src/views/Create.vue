@@ -82,14 +82,14 @@ export default defineComponent({
       workchain: 0 as 0 | -1
     });
     const name = ref<HTMLInputElement | null>(null);
-    const network = computed(() => state.Common.Wallet.network);
-    const forging = computed(() => state.Common.Wallet.forging);
-    const forgingString = computed(() => state.Common.Wallet.forgingString);
+    const network = computed(() => state.Wallet.network);
+    const forging = computed(() => state.Wallet.forging);
+    const forgingString = computed(() => state.Wallet.forgingString);
 
     onMounted(() => {
       form.value.name = getNextName(
         "Wallet",
-        state.Common.Wallet.wallets.map(w => w.name)
+        state.Wallet.wallets.map(w => w.name)
       );
       setTimeout(() => {
         name.value?.focus();
@@ -103,7 +103,7 @@ export default defineComponent({
           type: "error",
           duration: 2000
         });
-      const exists = state.Common.Wallet.wallets
+      const exists = state.Wallet.wallets
         .map(w => w.name)
         .find(n => n === form.value.name);
 
@@ -114,13 +114,13 @@ export default defineComponent({
       }
 
       try {
-        await dispatch.Common.Wallet.forgeWallet({
+        await dispatch.Wallet.forgeWallet({
           name: form.value.name,
           workchain: form.value.workchain
         });
       } catch (error) {
         handleError(error, error, 6000);
-        commit.Common.Wallet.setForging(false);
+        commit.Wallet.setForging(false);
       }
     };
 

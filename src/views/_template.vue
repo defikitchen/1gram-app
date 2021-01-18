@@ -18,7 +18,7 @@ export default defineComponent({
   setup() {
     const { store } = useVuex();
     onMounted(() => {
-      store.commit.Common.Loading.stopLoading();
+      store.commit.Loading.stopLoading();
     });
 
     return {

@@ -136,18 +136,18 @@ export default defineComponent({
       store: { state, commit, getters, dispatch }
     } = useVuex();
     const route = useRoute();
-    const wallet = computed(() => getters.Common.Wallet.wallet);
+    const wallet = computed(() => getters.Wallet.wallet);
     const { qr } = useQr();
 
     const pinDialog = computed({
-      get: () => state.Common.Login.pinDialog,
-      set: val => commit.Common.Login.setPinDialog(val)
+      get: () => state.Login.pinDialog,
+      set: val => commit.Login.setPinDialog(val)
     });
 
     const openModal = (name: string) => router.push("?modal=" + name);
 
     const addNetwork = (network: Network) => {
-      commit.Common.Wallet.addNetwork({ ...network, id: makeid(20) });
+      commit.Wallet.addNetwork({ ...network, id: makeid(20) });
       closeModals();
     };
 
@@ -183,13 +183,13 @@ export default defineComponent({
       const address = wallet.value?.address;
       if (!address) return router.push("/portfolio");
       router.push("?");
-      commit.Common.Wallet.patchWallet({
+      commit.Wallet.patchWallet({
         address: wallet.value?.address || "",
         update: {
           network
         }
       });
-      await dispatch.Common.Wallet.updateWallet({ address, force: true });
+      await dispatch.Wallet.updateWallet({ address, force: true });
     };
 
     const onDecode = (value: string) => {

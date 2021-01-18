@@ -83,13 +83,13 @@ export default defineComponent({
     const { store } = useVuex();
 
     const enteredPin = computed({
-      get: () => store.state.Common.Login.pinDialogForm,
-      set: store.commit.Common.Login.setPinDialogForm
+      get: () => store.state.Login.pinDialogForm,
+      set: store.commit.Login.setPinDialogForm
     });
 
     const dialog = computed({
-      get: () => store.state.Common.Login.pinDialog,
-      set: (store.commit.Common.Login as any).setPinDialogForm
+      get: () => store.state.Login.pinDialog,
+      set: (store.commit.Login as any).setPinDialogForm
     });
 
     const title = computed(() => {
@@ -104,11 +104,11 @@ export default defineComponent({
     });
 
     const persistent = computed(() => {
-      return !!store.state.Common.Login.pinDialogPersistent;
+      return !!store.state.Login.pinDialogPersistent;
     });
 
     onMounted(() => {
-      store.commit.Common.Loading.stopLoading();
+      store.commit.Loading.stopLoading();
     });
 
     const createPin = () => {
@@ -118,7 +118,7 @@ export default defineComponent({
     const confirmPin = async () => {
       if (createdPin.value && confirmedPin.value === createdPin.value) {
         try {
-          await store.dispatch.Common.Login.create(createdPin.value);
+          await store.dispatch.Login.create(createdPin.value);
           await pause(200);
           enterPin(createdPin.value);
         } catch (error) {
@@ -136,7 +136,7 @@ export default defineComponent({
     };
 
     const reset = () => {
-      step.value = store.state.Common.Login.pinCreated ? "enter" : "create";
+      step.value = store.state.Login.pinCreated ? "enter" : "create";
       createdPin.value = "";
       confirmedPin.value = "";
     };

@@ -226,15 +226,15 @@ const mutations = defineMutations<WalletState>()({
 const actions = defineActions({
   async getKey(ctx) {
     const { rootState, rootDispatch } = moduleCtx(ctx);
-    let pin = rootState.Common.Login.pin;
+    let pin = rootState.Login.pin;
     if (!pin)
-      pin = await rootDispatch.Common.Login.promptPin({
+      pin = await rootDispatch.Login.promptPin({
         persistent: false
       });
     const keyData: MasterKey = {
       mnemonic: encrypt(
         getMnemonic("english", 12),
-        rootState.Common.Login.pin as string
+        rootState.Login.pin as string
       ),
       id: randomstring.generate(32),
       name: getNextName(
@@ -293,8 +293,8 @@ const actions = defineActions({
     const { rootState, state, commit, rootDispatch, dispatch } = moduleCtx(ctx);
     const { network } = state as WalletState;
     const pin =
-      rootState.Common.Login.pin ||
-      (await rootDispatch.Common.Login.promptPin({ persistent: false }));
+      rootState.Login.pin ||
+      (await rootDispatch.Login.promptPin({ persistent: false }));
     if (state.forging) throw new Error("Busy forging wallet");
     commit.setForging(true);
     commit.setForgingString("Preparing");
@@ -414,14 +414,14 @@ const actions = defineActions({
     // const forceBackup =
     //   !wallet.imported && state.wallets.filter(w => !w.imported).length === 1;
     commit.setForgingString("");
-    rootDispatch.Common.Loading.startLoading({
+    rootDispatch.Loading.startLoading({
       command: "startLoadingOverlay",
       value: "Loading…"
     });
 
     router
       .push("/wallet")
-      // .catch(() => store.commit.Common.Loading.stopLoading())
+      // .catch(() => store.commit.Loading.stopLoading())
       .finally(() => {
         console.log(wallet);
         if (wallet.network.giverAddress) {
@@ -463,9 +463,9 @@ const actions = defineActions({
       let id = "";
 
       if (network.protocol === "ton") {
-        let pin = rootState.Common.Login.pin;
+        let pin = rootState.Login.pin;
         if (!pin)
-          pin = await rootDispatch.Common.Login.promptPin({
+          pin = await rootDispatch.Login.promptPin({
             persistent: false
           });
         const keypair: KeyPair = JSON.parse(decrypt(wallet.keyPair, pin));

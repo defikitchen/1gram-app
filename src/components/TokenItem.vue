@@ -13,7 +13,7 @@
 
       <v-list-item-action>
         <v-list-item-action-text class="wallet-item__balance font-weight-bold">
-          {{ asBaseCurrency(balance, baseCurrency.code, 0, 2) }}
+          {{ formatToken(asBaseCurrency(balance), baseCurrency.code, 0, 2) }}
         </v-list-item-action-text>
       </v-list-item-action>
     </v-list-item>
@@ -26,7 +26,8 @@
       <v-list>
         <v-list-item>
           <v-list-item-avatar :size="45">
-            <identicon :src="token.logo" :seed="token.address" />
+            <identicon v-if="'logo' in token" :src="token.logo" />
+            <identicon e-else :seed="token.address" />
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-subtitle class="mb-2">Address</v-list-item-subtitle>
@@ -52,7 +53,14 @@
               >Your Balance</v-list-item-subtitle
             >
             <v-list-item-title>
-              {{ token(token.balance, token.symbol, token.decimals, 2) }}
+              {{
+                formatToken(
+                  "balance" in token ? token.balance : 0,
+                  token.symbol,
+                  token.decimals,
+                  2
+                )
+              }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -64,7 +72,9 @@
               >Balance in {{ baseCurrency.code }}</v-list-item-subtitle
             >
             <v-list-item-title>
-              {{ token(asBaseCurrency(balance), baseCurrency.code, 0, 2) }}
+              {{
+                formatToken(asBaseCurrency(balance), baseCurrency.code, 0, 2)
+              }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -78,7 +88,7 @@
             <v-list-item-title
               >1 {{ token.symbol }} ≈
               {{
-                token(asBaseCurrency(price), baseCurrency.code, 0, 2)
+                formatToken(asBaseCurrency(price), baseCurrency.code, 0, 2)
               }}</v-list-item-title
             >
           </v-list-item-content>
@@ -142,7 +152,7 @@ import {
 } from "@vue/composition-api";
 import { Wallet } from "@/models/wallet";
 import { Tx } from "@/models/tx";
-import { ERC20AccountInfo } from "@/models/erc20";
+import { ERC20AccountInfo, ERC20TokenInfo } from "@/models/erc20";
 import { useUsdTokenPrice, usePrices } from "@/hooks/use-prices";
 import { useExplorer } from "@/hooks/use-explorer";
 import { useCopy } from "@/hooks/use-copy";
@@ -157,7 +167,7 @@ export default defineComponent({
   props: {
     token: {
       required: true,
-      type: Object as PropType<ERC20AccountInfo>
+      type: Object as PropType<ERC20TokenInfo | ERC20AccountInfo>
     },
     wallet: {
       type: Object as PropType<Wallet>,
@@ -181,14 +191,14 @@ export default defineComponent({
     );
 
     const openTransaction = (tx: Tx) => {
-      store.commit.Common.Wallet.setTransaction(tx);
+      store.commit.Wallet.setTransaction(tx);
       router.push("/wallet/transaction");
     };
 
     const balance = computed(() => {
       const tokenPrice = +useUsdTokenPrice(
         token.value.address,
-        token.value.balance,
+        "balance" in token.value ? token.value.balance : 0,
         token.value.decimals,
         tokenPrices
       );
@@ -211,7 +221,7 @@ export default defineComponent({
     });
 
     return {
-      ...useFilters(),
+      formatToken: useFilters().token,
       price,
       balance,
       asBaseCurrency,

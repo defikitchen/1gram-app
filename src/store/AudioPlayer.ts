@@ -33,10 +33,7 @@ const mutations: MutationTree<AudioPlayerState> = {
 const actions = {
   play: ({ state, commit, rootState }, src: string) => {
     try {
-      if (
-        (rootState as any).Common.Loading.online &&
-        getPlatform() !== Platform.Cordova
-      ) {
+      if (rootState.Loading.online && getPlatform() !== Platform.Cordova) {
         commit("setSrc", src);
         const audio = new Audio(state.src);
         audio.play();
